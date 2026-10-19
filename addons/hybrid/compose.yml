@@ -1,0 +1,77 @@
+x-gravitee:
+  kind: addon
+  name: Hybrid gateway
+  category: Gravitee Platform
+  description: APIM gateway managed by Gravitee Cloud
+  requires:
+    license: [apim-bridge-gateway]
+  gateway:   # The gateway of a platform that this add-on runs here, and the setting that takes its token
+    platform: cloud
+    service: apim-hybrid-gateway
+    token: HYBRID_CLOUD_TOKEN
+
+services:
+
+  apim-hybrid-gateway:
+    image: ${HYBRID_GATEWAY_REGISTRY:-graviteeio}/apim-gateway:${HYBRID_GATEWAY_VERSION:-4.12.21-debian}   # Docker registry and version of the gateway image
+    container_name: gio-apim-hybrid-gateway
+    restart: unless-stopped
+    depends_on:
+      hybrid-redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8090:8082"   # HTTP entrypoint
+    volumes:
+      - ../../../../../plugins/apim:/opt/graviteeio-gateway/plugins-ext   # The plugins of API Management, as the core's gateway has them
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # Lets a backend URL name this machine, also on Linux
+    environment:
+      # License, Gravitee Cloud
+      gravitee_license_key: ${HYBRID_LICENSE:-${GRAVITEE_LICENSE:-}}   # License key with the feature apim-bridge-gateway; the core's license when empty
+      gravitee_cloud_token: ${HYBRID_CLOUD_TOKEN}   # Token of the hybrid gateway, written by the Gravitee Cloud page when it creates or starts the gateway
+
+      # Plugins
+      gravitee_plugins_path_0: $${gravitee.home}/plugins
+      gravitee_plugins_path_1: $${gravitee.home}/plugins-ext
+
+      # JVM heap
+      GIO_MIN_MEM: 512m
+      GIO_MAX_MEM: 1g
+
+      # Internal API
+      gravitee_services_core_http_authentication_users_admin: ${INTERNAL_API_PASSWORD:-adminadmin}   # Password of the gateway's internal API (user admin)
+
+      # Rate limit storage (Redis)
+      gravitee_ratelimit_type: redis
+      gravitee_ratelimit_redis_host: hybrid-redis
+      gravitee_ratelimit_redis_port: "6379"
+      gravitee_ratelimit_redis_password: ${REDIS_PASSWORD:-redispassword}   # Redis password
+    labels:
+      io.gravitee.name: Hybrid gateway
+      io.gravitee.description: Gateway that gets its APIs from Gravitee Cloud
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf -u admin:${INTERNAL_API_PASSWORD:-adminadmin} http://localhost:18082/_node/health | grep -Eq '\"healthy\" *: *true'"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 30s
+    networks:
+      - edge
+      - internal
+
+  hybrid-redis:
+    image: redis:${HYBRID_REDIS_VERSION:-${REDIS_VERSION:-8.10.1-alpine}}   # Redis version (image tag), the core's one by default
+    container_name: gio-hybrid-redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redispassword}
+    labels:
+      io.gravitee.name: Hybrid gateway Redis
+      io.gravitee.description: Stores the hybrid gateway's rate limit counters
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD:-redispassword} --no-auth-warning ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 30s
+    networks:
+      - internal
