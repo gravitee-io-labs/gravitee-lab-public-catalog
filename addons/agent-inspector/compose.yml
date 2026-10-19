@@ -1,0 +1,48 @@
+x-gravitee:
+  kind: addon
+  name: AI Agent Inspector
+  category: AI
+  description: Live sequence diagram of the agent, LLM and MCP traffic going through the gateway
+  requires:
+    license: [apim-reporter-tcp]
+
+services:
+
+  agent-inspector:
+    build: https://github.com/gravitee-io-labs/Gravitee-AI-Agent-Workshop.git#8ccb3f1f0e67450200c90fea46d3fd04373f41b7:agent-live-graph   # Pinned to an upstream commit, so the image does not change unannounced
+    image: ghcr.io/gravitee-io-labs/gravitee-lab-public-catalog/agent-inspector-agent-inspector:latest
+    pull_policy: ${AGENT_INSPECTOR_PULL_POLICY:-never}   # build: build it here at each start; never: build it here once; always: pull it, build it here if it cannot be pulled
+    container_name: gio-agent-inspector
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9002:9002"   # Web UI
+    environment:
+      HTTP_PORT: "9002"
+      TCP_PORT: "9001"   # Port receiving the gateway's TCP reports
+      OTEL_PORT: "4318"   # Port receiving the gateway's OpenTelemetry spans
+    labels:
+      io.gravitee.name: AI Agent Inspector
+      io.gravitee.description: Shows live sequence diagrams of agent, LLM and MCP traffic
+      io.gravitee.console.agent-inspector.name: AI Agent Inspector
+      io.gravitee.console.agent-inspector.url: http://localhost:9002
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:9002/"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    networks:
+      - internal
+
+  apim-gateway:
+    environment:
+      # Requests and responses, as JSON events
+      gravitee_reporters_tcp_enabled: "true"
+      gravitee_reporters_tcp_host: agent-inspector
+      gravitee_reporters_tcp_port: "9001"
+      gravitee_reporters_tcp_output: json
+      # Policy details, as OpenTelemetry spans
+      gravitee_services_opentelemetry_enabled: "true"
+      gravitee_services_opentelemetry_verbose: "true"
+      gravitee_services_opentelemetry_exporter_endpoint: http://agent-inspector:4318
+      gravitee_services_opentelemetry_exporter_protocol: http/protobuf

@@ -1,0 +1,13 @@
+# What the Lab reads to show this catalog.
+x-gravitee-catalog:
+  schema: 1
+  id: gravitee
+  name: Gravitee public
+  description: Playgrounds, setups and add-ons of the Lab
+  version: 1.0.0
+  lab: 1
+  license: AGPL-3.0-only
+  images: ghcr.io/gravitee-io-labs/gravitee-lab-public-catalog
+  shared_settings: [GEMINI_API_KEY, OLLAMA_URL]
+  canary:
+    - playground:acme-hotels

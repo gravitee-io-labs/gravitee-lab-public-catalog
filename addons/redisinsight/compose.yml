@@ -1,0 +1,41 @@
+x-gravitee:
+  kind: addon
+  name: RedisInsight
+  category: Other
+  description: Browser for the Redis behind rate limits, caches and vector stores
+
+services:
+
+  redisinsight:
+    image: redis/redisinsight:${REDISINSIGHT_VERSION:-3.8.0}   # RedisInsight version (image tag)
+    container_name: gio-redisinsight
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:5540:5540"   # Web UI
+    volumes:
+      - data-redisinsight:/data
+    environment:
+      # The stack's Redis, already connected
+      RI_REDIS_HOST: redis
+      RI_REDIS_PORT: "6379"
+      RI_REDIS_PASSWORD: ${REDIS_PASSWORD:-redispassword}   # Password of the stack's Redis
+      RI_REDIS_ALIAS: Gravitee
+    labels:
+      io.gravitee.name: RedisInsight
+      io.gravitee.description: Browser for the data in the stack's Redis
+      io.gravitee.console.redisinsight.name: RedisInsight
+      io.gravitee.console.redisinsight.url: http://localhost:5540
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:5540/api/health/"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    networks:
+      - internal
+
+volumes:
+  data-redisinsight:

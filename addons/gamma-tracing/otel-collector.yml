@@ -1,0 +1,60 @@
+# The gateway's traces, and the log records of its OpenTelemetry reporter, go to Elasticsearch, into the data streams that
+# Gamma's Tracing pages read: traces-apim.otel-default and logs-apim.otel-default, where "default" is the id of the
+# organization in lower case
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 256
+  # The exporter writes each document to the data stream that these two attributes name
+  resource/data-stream:
+    attributes:
+      - key: data_stream.dataset
+        value: apim
+        action: upsert
+      - key: data_stream.namespace
+        value: default
+        action: upsert
+  # The exporter writes a span's events as log records: Gamma finds them by the API and the environment, which it
+  # reads from the record's own attributes
+  transform/span-events:
+    trace_statements:
+      - context: spanevent
+        statements:
+          - set(attributes["gravitee.api.id"], resource.attributes["gravitee.api.id"])
+          - set(attributes["gravitee.env.id"], resource.attributes["gravitee.env.id"])
+  # A caller that sends its trace context (traceparent) gives the gateway's first span a parent that nobody records,
+  # and Gamma lists a trace by the span with no parent: the gateway's first span of a call starts its trace
+  transform/first-span:
+    trace_statements:
+      - context: span
+        statements:
+          - set(parent_span_id, SpanID(0x0000000000000000)) where kind == SPAN_KIND_SERVER
+
+exporters:
+  elasticsearch:
+    endpoints: [http://elasticsearch:9200]
+    mapping:
+      mode: otel
+    sending_queue:
+      batch:
+        flush_timeout: 1s   # Write what is waiting after one second, so a trace shows up in Gamma quickly
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, resource/data-stream, transform/first-span, transform/span-events]
+      exporters: [elasticsearch]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, resource/data-stream]
+      exporters: [elasticsearch]

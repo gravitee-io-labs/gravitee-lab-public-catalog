@@ -1,0 +1,47 @@
+x-gravitee:
+  kind: addon
+  name: Gamma Tracing
+  category: Observability
+  description: Step-by-step trace of each call through the gateway, in Gamma's Tracing pages
+  conflicts:
+    agent-inspector: both take the gateway's OpenTelemetry exporter
+
+services:
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:${OTEL_COLLECTOR_VERSION:-0.162.0}   # OpenTelemetry Collector version (image tag)
+    container_name: gio-otel-collector
+    restart: unless-stopped
+    volumes:
+      - ./otel-collector.yml:/etc/otelcol-contrib/config.yaml:ro
+    labels:
+      io.gravitee.name: OpenTelemetry Collector
+      io.gravitee.description: Collects the gateway's traces and logs
+    networks:
+      - internal
+
+  apim-gateway:
+    depends_on:
+      otel-collector:
+        condition: service_started
+    environment:
+      # Send traces and log records to the collector
+      gravitee_services_opentelemetry_enabled: "true"
+      gravitee_services_opentelemetry_verbose: "true"
+      gravitee_services_opentelemetry_exporter_endpoint: http://otel-collector:4317
+      gravitee_services_opentelemetry_exporter_protocol: grpc
+      gravitee_services_opentelemetry_exporter_logsEndpoint: http://otel-collector:4318/v1/logs
+      gravitee_reporters_otel_enabled: "true"
+      # Mask credentials in spans: attributes named api key, authorization, cookie, secret, password, credential or token
+      # (except usage and rate limit counters)
+      gravitee_services_opentelemetry_redactionDefaultReplacement: "***"
+      gravitee_services_opentelemetry_redactionRules_0_attributeNamePattern: "regex:(?i)(?!.*(usage|rate-?limit)).*(api[-_]?key|authorization|cookie|secret|passw(or)?d|credential|token).*"
+      gravitee_services_opentelemetry_redactionRules_0_maskingStrategy_type: FULL
+
+  apim-management-api:
+    environment:
+      # Store traces and logs in Elasticsearch, where Gamma's Tracing pages read them
+      gravitee_repositories_otel-traces_type: elasticsearch
+      gravitee_repositories_otel-traces_elasticsearch_endpoints_0: http://elasticsearch:9200
+      gravitee_repositories_otel-logs_type: elasticsearch
+      gravitee_repositories_otel-logs_elasticsearch_endpoints_0: http://elasticsearch:9200

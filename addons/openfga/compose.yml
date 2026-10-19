@@ -1,0 +1,78 @@
+x-gravitee:
+  kind: addon
+  name: OpenFGA
+  category: API
+  description: Fine-grained authorization server, with the OpenFGA Playground UI
+
+services:
+
+  openfga-postgres:
+    image: postgres:${OPENFGA_POSTGRES_VERSION:-17.9}   # PostgreSQL version (image tag)
+    container_name: gio-openfga-postgres
+    restart: unless-stopped
+    volumes:
+      - data-openfga:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: openfga
+      POSTGRES_USER: openfga
+      POSTGRES_PASSWORD: ${OPENFGA_POSTGRES_PASSWORD:-openfga}   # Password of the OpenFGA database user
+    labels:
+      io.gravitee.name: OpenFGA database
+      io.gravitee.description: PostgreSQL database holding OpenFGA's data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openfga -d openfga"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - internal
+
+  openfga-migrate:
+    image: openfga/openfga:${OPENFGA_VERSION:-v1.21.0}   # OpenFGA version (image tag)
+    container_name: gio-openfga-migrate
+    command: migrate
+    depends_on:
+      openfga-postgres:
+        condition: service_healthy
+    environment: &openfga-datastore
+      OPENFGA_DATASTORE_ENGINE: postgres
+      OPENFGA_DATASTORE_URI: postgres://openfga:${OPENFGA_POSTGRES_PASSWORD:-openfga}@openfga-postgres:5432/openfga?sslmode=disable
+    labels:
+      io.gravitee.name: OpenFGA migration
+      io.gravitee.description: Creates the OpenFGA database schema, then exits
+    networks:
+      - internal
+
+  openfga:
+    image: openfga/openfga:${OPENFGA_VERSION:-v1.21.0}
+    container_name: gio-openfga
+    restart: unless-stopped
+    command: run
+    depends_on:
+      openfga-migrate:
+        condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:8180:8180"   # HTTP API
+      - "127.0.0.1:8181:8081"   # gRPC API
+      - "127.0.0.1:3000:3000"   # Playground
+    environment:
+      <<: *openfga-datastore
+      OPENFGA_HTTP_ADDR: 0.0.0.0:8180   # HTTP API address, also called by the Playground from your browser
+      OPENFGA_LOG_FORMAT: json
+      OPENFGA_AUTHN_METHOD: none
+      OPENFGA_PLAYGROUND_ENABLED: "true"
+    labels:
+      io.gravitee.name: OpenFGA
+      io.gravitee.description: Fine-grained authorization server with the Playground UI
+      io.gravitee.console.openfga.name: OpenFGA Playground
+      io.gravitee.console.openfga.url: http://localhost:3000/playground
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/grpc_health_probe", "-addr=localhost:8081"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - internal
+
+volumes:
+  data-openfga:

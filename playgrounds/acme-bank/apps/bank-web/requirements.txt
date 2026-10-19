@@ -1,0 +1,4 @@
+a2a-sdk[http-server]==1.2.2
+starlette==1.7.0
+uvicorn==0.54.0
+httpx==0.28.1

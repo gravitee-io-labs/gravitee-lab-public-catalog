@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f6f5f3" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e0d0c" media="(prefers-color-scheme: dark)">
+  <title>ACME Bank</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%233347d6'/%3E%3Cpath d='M16 6.5 7 11.5h18L16 6.5zM9.5 13.5v7h2.6v-7H9.5zm5.2 0v7h2.6v-7h-2.6zm5.2 0v7h2.6v-7h-2.6zM7.5 22.5v2h17v-2h-17z' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <script src="theme.js"></script>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <a class="skip" href="#rail">Skip to the commands</a>
+  <a class="skip" href="#inspector">Skip to Behind the answer</a>
+
+  <header class="topbar" id="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#assistant" aria-label="ACME Bank">
+        <span class="logo" data-icon="logo"></span>
+        <span class="brand-name">ACME Bank</span>
+      </a>
+
+      <nav class="nav" id="nav" aria-label="Views">
+        <a class="nav-link" href="#assistant" data-view="assistant"><span>Assistant</span></a>
+        <a class="nav-link" href="#teams" data-view="teams"><span>Teams</span></a>
+        <a class="nav-link" href="#developers" data-view="developers"><span>Developers</span></a>
+        <a class="nav-link" href="#presenter" data-view="presenter"><span>Presenter</span></a>
+      </nav>
+
+      <div class="tools">
+        <a class="btn btn-platform" id="gamma-link" href="#" target="_blank" rel="noopener" data-gamma aria-label="Open Gamma (opens a new tab)"><span data-icon="gamma"></span><span class="btn-text">Open Gamma</span><span data-icon="external"></span></a>
+        <button type="button" class="icon-btn" id="theme" aria-haspopup="menu" aria-expanded="false" aria-controls="theme-menu" aria-label="Theme"></button>
+        <button type="button" class="icon-btn" id="more" aria-haspopup="menu" aria-expanded="false" aria-controls="theme-menu" aria-label="Menu"><span data-icon="more"></span></button>
+        <div class="menu" id="theme-menu" role="menu" aria-label="Theme" hidden></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell" id="shell" data-view="assistant">
+    <aside class="rail" id="rail" aria-label="Commands" tabindex="-1">
+      <div class="commands" aria-hidden="true">
+        <div class="commands-head"><h2>Commands</h2></div>
+        <div class="skeleton row"></div><div class="skeleton row"></div><div class="skeleton row"></div><div class="skeleton row"></div><div class="skeleton row"></div><div class="skeleton row"></div>
+      </div>
+    </aside>
+
+    <main id="main" class="main" tabindex="-1">
+
+      <!-- Assistant -->
+      <section class="view" id="view-assistant" data-view="assistant" aria-labelledby="h-assistant">
+        <h1 class="sr" id="h-assistant">Assistant</h1>
+        <section class="stage" aria-label="Conversation with Ace">
+          <header class="stage-head" id="chat-head">
+            <span class="tile" data-icon="ace"></span>
+            <h2>Ace</h2>
+            <div class="gateway" id="gateway" role="radiogroup" aria-label="How questions reach Ace">
+              <button type="button" role="radio" aria-checked="false" aria-label="Direct" data-mode="off" class="gateway-option"><span data-icon="direct"></span><span>Direct</span></button>
+              <button type="button" role="radio" aria-checked="true" aria-label="Through the Gravitee gateway" data-mode="on" class="gateway-option"><span data-icon="gateway"></span><span class="gateway-full">Through the Gravitee gateway</span><span class="gateway-short" aria-hidden="true">Gateway</span></button>
+            </div>
+            <div class="head-end">
+              <button type="button" class="btn btn-quiet btn-sm" id="open-tokens" aria-label="Tokens" title="Tokens" disabled><span data-icon="key"></span><span class="btn-text">Tokens</span></button>
+              <div class="person" id="person">
+                <button type="button" class="person-button" id="person-button" aria-haspopup="menu" aria-expanded="false" aria-controls="person-menu">
+                  <span class="avatar avatar-empty" id="person-avatar"><span data-icon="user"></span></span>
+                  <span class="person-text"><span class="person-name" id="person-name">Choose who is asking</span><span class="person-role" id="person-role"></span></span>
+                  <span class="person-caret" data-icon="chevron-down"></span>
+                </button>
+                <div class="menu" id="person-menu" role="menu" aria-label="Who is asking" hidden></div>
+              </div>
+            </div>
+          </header>
+          <div class="conversation" id="conversation" role="log" aria-live="off" aria-label="Conversation"></div>
+          <div class="dock">
+            <div class="composer-box">
+              <form class="composer" id="composer" autocomplete="off">
+                <label for="message" class="sr">Message to Ace</label>
+                <textarea id="message" rows="1" maxlength="2000" placeholder="Your question"></textarea>
+              </form>
+              <form class="payform" id="money-form" aria-label="Send money" hidden>
+                <div class="field"><label for="money-from">From account</label><input id="money-from" autocomplete="off" maxlength="20" spellcheck="false"></div>
+                <div class="field"><label for="money-to">To account</label><input id="money-to" autocomplete="off" maxlength="20" spellcheck="false"></div>
+                <div class="field"><label for="money-amount">Amount in EUR</label><input id="money-amount" type="number" step="any" inputmode="decimal"></div>
+                <div class="field"><label for="money-ref">Reference</label><input id="money-ref" autocomplete="off" maxlength="60"></div>
+              </form>
+              <div class="composer-bar">
+                <div class="modes" id="modes" role="radiogroup" aria-label="What to send">
+                  <button type="button" role="radio" aria-checked="true" data-mode="ask" class="mode-option"><span data-icon="ace"></span><span>Ask Ace</span></button>
+                  <button type="button" role="radio" aria-checked="false" tabindex="-1" data-mode="pay" class="mode-option"><span data-icon="send"></span><span>Send money</span></button>
+                </div>
+                <button type="submit" form="composer" class="btn btn-primary send" id="send" disabled aria-label="Send"><span data-icon="send"></span></button>
+                <button type="submit" form="money-form" class="btn btn-primary" id="money-send" disabled hidden><span data-icon="send"></span><span>Pay</span></button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- Teams -->
+      <section class="view" id="view-teams" data-view="teams" aria-labelledby="h-teams" hidden>
+        <h1 class="sr" id="h-teams">Teams</h1>
+        <section class="stage" aria-label="Answers of the team">
+          <header class="stage-head">
+            <span class="tile" data-icon="users"></span>
+            <h2>ACME Bank Teams</h2>
+            <div class="person" id="team-picker">
+              <button type="button" class="person-button" id="team-button" aria-haspopup="menu" aria-expanded="false" aria-controls="team-menu">
+                <span class="avatar"><span data-icon="users"></span></span>
+                <span class="person-text"><span class="person-name" id="team-name">Team</span></span>
+                <span class="person-caret" data-icon="chevron-down"></span>
+              </button>
+              <div class="menu" id="team-menu" role="menu" aria-label="Team" hidden></div>
+            </div>
+          </header>
+          <div class="band-slot" id="band-teams"></div>
+          <div class="feed" id="team-feed" role="log" aria-live="off" aria-label="Answers of the team"></div>
+          <div class="dock">
+            <div class="actions">
+              <button type="button" class="btn btn-primary" id="team-short"><span data-icon="send"></span><span>Short answer</span></button>
+              <button type="button" class="btn" id="team-long">Long answer</button>
+              <button type="button" class="btn" id="team-triple" aria-label="Long answer x3: three long answers in a row"><span data-icon="zap"></span><span>Long answer x3</span></button>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- Developers -->
+      <section class="view" id="view-developers" data-view="developers" aria-labelledby="h-developers" hidden>
+        <h1 class="sr" id="h-developers">Developers</h1>
+        <section class="stage" aria-label="Answers of the LLM proxy">
+          <header class="stage-head">
+            <span class="tile" data-icon="code"></span>
+            <h2>ACME Bank LLM</h2>
+            <span class="chip note"><span data-icon="key"></span><span>Developers key</span></span>
+          </header>
+          <div class="band-slot" id="band-developers"></div>
+          <div class="feed" id="dev-feed" role="log" aria-live="off" aria-label="Answers of the LLM proxy"></div>
+          <div class="dock">
+            <form class="composer-box" id="dev-form" autocomplete="off">
+              <label for="dev-message" class="sr">Question</label>
+              <textarea id="dev-message" rows="2" maxlength="2000">Explain how a mortgage works, in detail.</textarea>
+              <div class="composer-bar">
+                <div class="bar-actions">
+                  <button type="button" class="btn btn-quiet" id="dev-burst" aria-label="Send x10: ten questions in a row"><span data-icon="zap"></span><span>Send x10</span></button>
+                  <button type="button" class="btn btn-quiet" id="dev-faq"><span data-icon="database"></span><span>Ask the cached FAQ twice</span></button>
+                </div>
+                <button type="submit" class="btn btn-primary send" id="dev-send" aria-label="Send"><span data-icon="send"></span></button>
+              </div>
+            </form>
+          </div>
+        </section>
+      </section>
+
+      <!-- Presenter -->
+      <section class="view" id="view-presenter" data-view="presenter" aria-labelledby="h-presenter" hidden>
+        <h1 class="sr" id="h-presenter">Presenter</h1>
+        <div class="presenter">
+          <section class="card check-pane" aria-label="Lab check">
+            <div class="check-head">
+              <button type="button" class="btn btn-primary" id="presenter-check"><span data-icon="check"></span><span>Check</span></button>
+              <span class="chip" id="check-summary" hidden></span>
+            </div>
+            <div id="check-list" class="checks"></div>
+          </section>
+          <div class="action-pane card">
+            <section aria-labelledby="models-title">
+              <h2 id="models-title">Models</h2>
+              <button type="button" class="btn" id="presenter-warm"><span data-icon="flame"></span><span>Warm up</span></button>
+              <div id="warm-list" class="checks"></div>
+            </section>
+            <section aria-labelledby="traffic-title">
+              <h2 id="traffic-title">Traffic</h2>
+              <button type="button" class="btn" id="presenter-traffic"><span data-icon="pause"></span><span>Pause traffic</span></button>
+              <p class="card-note" id="traffic-state"></p>
+            </section>
+            <section aria-labelledby="bank-title">
+              <h2 id="bank-title">Bank</h2>
+              <button type="button" class="btn" id="presenter-reset"><span data-icon="reset"></span><span>Start the bank over</span></button>
+              <div id="reset-list" class="checks"></div>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="inspector" id="inspector" aria-label="Behind the answer" tabindex="-1">
+      <div class="monitor" id="monitor" hidden>
+        <section id="team-monitor" aria-labelledby="budget-title" hidden>
+          <h2 id="budget-title">Budget</h2>
+          <div id="team-budget" class="budget"></div>
+        </section>
+        <section id="dev-monitor" aria-labelledby="limit-title" hidden>
+          <h2 id="limit-title">Model tokens this minute</h2>
+          <div id="dev-limit" class="budget"></div>
+        </section>
+      </div>
+      <section class="behind idle" id="behind" aria-labelledby="behind-title">
+        <header class="behind-head">
+          <div class="behind-title">
+            <h2 id="behind-title">Behind the answer</h2>
+            <button type="button" class="icon-btn" id="behind-close" aria-label="Close" hidden><span data-icon="x"></span></button>
+          </div>
+          <p class="behind-subject" id="behind-subject" data-ref></p>
+        </header>
+        <div id="behind-body" class="behind-body"></div>
+      </section>
+    </aside>
+  </div>
+  <div class="scrim" id="scrim" hidden></div>
+
+  <nav class="tabbar" id="tabbar" aria-label="Views, bottom bar">
+    <a class="tab" href="#commands" data-view="commands"><span data-icon="play"></span><span>Commands</span></a>
+    <a class="tab" href="#assistant" data-view="assistant"><span data-icon="chat"></span><span>Assistant</span></a>
+    <a class="tab" href="#teams" data-view="teams"><span data-icon="users"></span><span>Teams</span></a>
+    <a class="tab" href="#developers" data-view="developers"><span data-icon="code"></span><span>Developers</span></a>
+    <a class="tab" href="#presenter" data-view="presenter"><span data-icon="monitor"></span><span>Presenter</span></a>
+  </nav>
+
+  <dialog id="tokens" class="drawer" aria-labelledby="tokens-title">
+    <header class="drawer-head">
+      <h2 id="tokens-title">Tokens</h2>
+      <button type="button" class="icon-btn" id="tokens-close" aria-label="Close"><span data-icon="x"></span></button>
+    </header>
+    <div class="drawer-body">
+      <div class="field">
+        <label for="tokens-value">Your access token</label>
+        <textarea id="tokens-value" class="mono" rows="5" readonly spellcheck="false" autocomplete="off"></textarea>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn" id="tokens-copy"><span data-icon="copy"></span><span>Copy token</span></button>
+        <span id="tokens-copied" class="card-note"></span>
+      </div>
+      <p class="card-note">Decoded for display, signature not checked.</p>
+      <div id="tokens-body" class="tokens-body"></div>
+    </div>
+  </dialog>
+
+  <div class="toasts" id="toasts" role="region" aria-label="Notifications"></div>
+  <div class="sr" id="announcer" role="status" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>

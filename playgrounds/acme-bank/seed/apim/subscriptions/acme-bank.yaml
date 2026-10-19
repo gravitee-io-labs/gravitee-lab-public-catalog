@@ -1,0 +1,24 @@
+subscriptions:
+  - application: ACME Bank web
+    api: Ace
+    plan: Bank users
+
+  - application: ACME Bank traffic
+    api: Ace
+    plan: Bank users
+
+  # The key of an API key plan is the one its caller already has: the apps send it, the seed never prints it
+  - application: Ace
+    api: ACME Bank LLM
+    plan: Ace agent
+    apiKey: "${ACE_LLM_API_KEY}"
+
+  - application: ACME Bank developers
+    api: ACME Bank LLM
+    plan: Developers
+    apiKey: "${DEV_LLM_API_KEY}"
+
+  - application: ACME Bank traffic
+    api: ACME Bank LLM
+    plan: Traffic
+    apiKey: "${TRAFFIC_LLM_API_KEY}"
