@@ -15,7 +15,7 @@ secrets/
 *.srl
 
 # Made by make index, kept as an artifact of every CI run
-catalog.json
+/catalog.json
 
 .DS_Store
 __pycache__/
