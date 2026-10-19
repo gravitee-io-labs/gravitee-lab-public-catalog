@@ -1,9 +1,9 @@
 # httpx2: the MCP and OpenAI SDKs; httpx: the A2A SDK and plain calls
 mcp==2.3.0
 a2a-sdk[http-server]==1.2.2
-openai==3.28.0
+openai==3.29.0
 starlette==1.7.0
 uvicorn==0.54.0
-pydantic==2.14.0
+pydantic==2.14.1
 httpx==0.28.1
 httpx2==2.13.1
