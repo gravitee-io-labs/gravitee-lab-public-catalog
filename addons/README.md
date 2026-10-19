@@ -1,6 +1,6 @@
 # Add-ons
 
-An add-on is one capability on top of the platform, with its own folder and settings; turn it on from the Lab UI.
+An add-on is one capability on top of the platform, with its own folder and settings; turn it on from the Lab.
 
 | Add-on | What it adds |
 |---|---|
@@ -11,4 +11,4 @@ An add-on is one capability on top of the platform, with its own folder and sett
 | [OpenFGA](openfga/) | Fine-grained authorization server, with the OpenFGA Playground UI |
 | [RedisInsight](redisinsight/) | Browser for the Redis behind rate limits, caches and vector stores |
 
-To make your own, see [CONTRIBUTING.md](https://github.com/gravitee-io-labs/gravitee-lab/blob/main/CONTRIBUTING.md).
+Every folder has the same README: what it is, what it needs, its ports, its logins and secrets, and its settings. To make your own, see [CONTRIBUTING.md](https://github.com/gravitee-io-labs/gravitee-lab/blob/main/CONTRIBUTING.md).

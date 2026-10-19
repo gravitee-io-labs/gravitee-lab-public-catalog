@@ -42,28 +42,46 @@ The Lab UI checks the license features before you start. They are in the `requir
 
 The apps are built here from `apps/` at each start. Set `ACME_BANK_PULL_POLICY` to `always` to pull the images that CI builds instead: [Built here, or pulled](https://github.com/gravitee-io-labs/gravitee-lab/blob/main/docs/configuration.md#built-here-or-pulled) has the details.
 
-## Accounts and URLs
+## Ports and URLs
 
-| What | Address |
-|---|---|
-| ACME Bank app | http://localhost:8110 |
-| Gamma console | http://localhost:8086 |
-| APIM Console | http://localhost:8084 |
-| Access Management console | http://localhost:8081 |
-| The bank's MCP server, unprotected: calling it skips the gateway | http://localhost:8111 |
-| Ace, behind the gateway's A2A proxy | http://localhost:8112 |
-| The bank's open REST API | http://localhost:8113 |
-| Ace with no gateway, identity or policy | http://localhost:8114 |
+| Port | What it is | Login |
+|---|---|---|
+| 8110 | The ACME Bank app, http://localhost:8110 | The accounts below |
+| 8111 | The bank's MCP server, unprotected: calling it skips the gateway | None |
+| 8112 | Ace, behind the gateway's A2A proxy | None |
+| 8113 | The bank's open REST API | None |
+| 8114 | Ace with no gateway, identity or policy | None |
 
-| Account | Sign-in |
-|---|---|
-| Alice and Bob, customers | `alice@acme-bank.test`, `bob@acme-bank.test` |
-| Tina, teller | `tina@acme-bank.test` |
-| Password of Alice, Bob and Tina | `HelloWorld@123`, a public demo value that `ACME_BANK_DEMO_PASSWORD` sets |
-| Gamma and APIM consoles | `admin` / `admin` |
-| Access Management console | `admin` / `adminadmin` |
+Every port binds `127.0.0.1`. The lessons also use the consoles of the platform:
 
-The playground's **Details** tab lists these accounts with copy buttons. A password or key there is the value of its setting now, in the order of [Settings](#settings). The admin passwords in the table above are the defaults of `ACME_BANK_APIM_PASSWORD` and `ACME_BANK_AM_PASSWORD`. The other demo values are in [Logins](https://github.com/gravitee-io-labs/gravitee-lab/blob/main/docs/configuration.md#logins).
+| Port | Console | Login |
+|---|---|---|
+| 8086 | Gamma, http://localhost:8086 | `admin` / `admin` |
+| 8084 | APIM Console, http://localhost:8084 | `admin` / `admin` |
+| 8081 | Access Management console, http://localhost:8081 | `admin` / `adminadmin` |
+
+The add-ons the playground brings have their own ports: see [Gamma Tracing](../../addons/gamma-tracing/README.md) and the other add-ons in this catalog.
+
+## Logins and secrets
+
+Everything here is a public demo value, for your machine only. The playground's **Details** tab lists the accounts with copy buttons; a password or key there is the value of its setting now.
+
+| Account | Sign-in | Password | Setting |
+|---|---|---|---|
+| Alice and Bob, customers of the app | `alice@acme-bank.test`, `bob@acme-bank.test` | `HelloWorld@123` | `ACME_BANK_DEMO_PASSWORD` |
+| Tina, teller | `tina@acme-bank.test` | `HelloWorld@123` | `ACME_BANK_DEMO_PASSWORD` |
+| Gamma and APIM consoles | `admin` | `admin` | `ACME_BANK_APIM_PASSWORD` |
+| Access Management console | `admin` | `adminadmin` | `ACME_BANK_AM_PASSWORD` |
+
+The two admin settings are the passwords the seed, the web app and the traffic generator sign in with: set them if you changed those passwords in a console.
+
+| Secret | Value | Setting |
+|---|---|---|
+| Access Management application secrets | `acme-bank-web`, `acme-bank-traffic`, `ace-agent`, `acme-bank-mcp` | `ACME_BANK_WEB_CLIENT_SECRET`, `ACME_BANK_TRAFFIC_CLIENT_SECRET`, `ACME_BANK_ACE_CLIENT_SECRET`, `ACME_BANK_MCP_RESOURCE_SECRET` |
+| LLM proxy keys | `acme-ace-llm-key`, `acme-dev-llm-key`, `acme-traffic-llm-key` | `ACME_BANK_ACE_LLM_API_KEY`, `ACME_BANK_DEV_LLM_API_KEY`, `ACME_BANK_TRAFFIC_LLM_API_KEY` |
+| Token that resets the bank's data | `acme-bank-admin` | `ACME_BANK_ADMIN_TOKEN` |
+
+Set them before the first start. The seed writes the passwords, secrets and API keys into Access Management and the APIs when it creates them, and keeps what it finds on later runs, so on a lab that is already set up a new value needs a reset. `ACME_BANK_ADMIN_TOKEN` is the exception: the apps read it directly, so *Save & apply* is enough.
 
 ## Settings
 
@@ -83,7 +101,7 @@ Set them from the key button of the playground in the Lab UI. Compose reads a se
 
 The playground's own settings start with `ACME_BANK_`. `OLLAMA_URL` and `GEMINI_API_KEY` name a host service and keep its common name.
 
-The demo secrets are settings too: `ACME_BANK_DEMO_PASSWORD`, `ACME_BANK_WEB_CLIENT_SECRET`, `ACME_BANK_TRAFFIC_CLIENT_SECRET`, `ACME_BANK_ACE_CLIENT_SECRET`, `ACME_BANK_MCP_RESOURCE_SECRET`, `ACME_BANK_ACE_LLM_API_KEY`, `ACME_BANK_DEV_LLM_API_KEY`, `ACME_BANK_TRAFFIC_LLM_API_KEY` and `ACME_BANK_ADMIN_TOKEN`. Set them before the first start. The seed writes the passwords, secrets and API keys into Access Management and the APIs when it creates them, and keeps what it finds on later runs, so on a lab that is already set up a new value needs a reset. `ACME_BANK_ADMIN_TOKEN` is the exception: the apps read it directly, so *Save & apply* is enough.
+The demo secrets and passwords are settings too: they are in [Logins and secrets](#logins-and-secrets).
 
 ## What you learn
 
