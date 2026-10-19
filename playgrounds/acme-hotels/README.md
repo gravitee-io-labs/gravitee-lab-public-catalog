@@ -8,7 +8,7 @@ It is the playground of the [Gravitee AI Agent Workshop](https://github.com/grav
 
 | Need | Details |
 |---|---|
-| An Enterprise license | It must include the AI features of API Management (the LLM, A2A and MCP tool server proxies, semantic caching, PII filtering and the AI models), the OpenFGA authorization engine and the AuthZEN endpoint of Access Management, and the TCP reporter of the AI Agent Inspector. Add it from the **CE** chip of the Lab UI's Stack page. To get one, see [What needs a license](https://github.com/gravitee-io-labs/gravitee-lab/blob/main/docs/installation.md#what-needs-a-license). |
+| An Enterprise license | It must include the AI features of API Management (the LLM, A2A and MCP tool server proxies, semantic caching, PII filtering and the AI models), the OpenFGA authorization engine and the AuthZEN endpoint of Access Management, and the TCP reporter of the AI Agent Inspector. Add it from the **CE** chip of the Lab UI's Containers page. To get one, see [What needs a license](https://github.com/gravitee-io-labs/gravitee-lab/blob/main/docs/installation.md#what-needs-a-license). |
 | API Management and Access Management 4.12 or later | The core's default versions fit. The playground's page checks the versions before you start. |
 | Ollama on your machine, with `qwen3:0.6b` | See [Start it](#start-it). ACME Hotels on Windows is untested; the Ollama setup for it is not verified. |
 | Internet access | The first start builds the apps from GitHub, with their packages from PyPI, and downloads the plugin `gravitee-policy-interrupt` from download.gravitee.io. The gateway downloads its AI models (129 MB) from huggingface.co the first time it deploys the LLM proxy. Without that access the seed, a one-time job that creates the playground's sample APIs and guest, ends with a timeout. |
@@ -31,29 +31,40 @@ The Lab UI checks the license features before you start: those in the `requires`
 
 The apps are built here from the workshop repository at each start. Set `ACME_HOTELS_PULL_POLICY` to `always` to pull the images that CI builds instead: [Built here, or pulled](https://github.com/gravitee-io-labs/gravitee-lab/blob/main/docs/configuration.md#built-here-or-pulled) has the details.
 
-## Accounts and URLs
+## Ports and URLs
 
-| What | Address |
-|---|---|
-| ACME Hotels website | http://localhost:8120 |
-| The hotels' REST API, unprotected: calling it skips the gateway | http://localhost:8121 (documentation: http://localhost:8121/docs) |
-| The agent's card, behind the gateway's A2A proxy | http://localhost:8082/hotel-agent/.well-known/agent-card.json |
-| AI Agent Inspector | http://localhost:9002 |
-| APIM Console | http://localhost:8084 |
-| Gamma console | http://localhost:8086 |
-| Access Management console | http://localhost:8081 |
-| OpenFGA Playground | http://localhost:3000/playground |
-| RedisInsight | http://localhost:5540 |
-| MCPJam Inspector | http://localhost:6274 |
+| Port | What it is | Login |
+|---|---|---|
+| 8120 | The ACME Hotels website, http://localhost:8120 | The guest below |
+| 8121 | The hotels' REST API, unprotected: calling it skips the gateway. Documentation: http://localhost:8121/docs | None |
 
-| Account | Sign-in |
-|---|---|
-| John Doe, guest of the website | `john.doe@gravitee.io` |
-| Password of John Doe | `HelloWorld@123`, a public demo value that `ACME_HOTELS_DEMO_PASSWORD` sets |
-| Gamma and APIM consoles | `admin` / `admin` |
-| Access Management console | `admin` / `adminadmin` |
+Every port binds `127.0.0.1`. The agent's card is behind the gateway's A2A proxy, at http://localhost:8082/hotel-agent/.well-known/agent-card.json. The lessons also use the consoles of the platform:
 
-The playground's **Details** tab lists these accounts with copy buttons. A password there is the value of its setting now, in the order of [Settings](#settings). The admin passwords in the table above are the defaults of `ACME_HOTELS_APIM_PASSWORD` and `ACME_HOTELS_AM_PASSWORD`. The other demo values are in [Logins](https://github.com/gravitee-io-labs/gravitee-lab/blob/main/docs/configuration.md#logins).
+| Port | Console | Login |
+|---|---|---|
+| 8084 | APIM Console, http://localhost:8084 | `admin` / `admin` |
+| 8086 | Gamma, http://localhost:8086 | `admin` / `admin` |
+| 8081 | Access Management console, http://localhost:8081 | `admin` / `adminadmin` |
+
+The add-ons the playground brings have their own ports and logins: [AI Agent Inspector](../../addons/agent-inspector/README.md) (9002), [OpenFGA](../../addons/openfga/README.md) (3000), [RedisInsight](../../addons/redisinsight/README.md) (5540) and [MCPJam Inspector](../../addons/mcp-inspector/README.md) (6274).
+
+## Logins and secrets
+
+Everything here is a public demo value, for your machine only. The playground's **Details** tab lists the accounts with copy buttons; a password there is the value of its setting now.
+
+| Account | Sign-in | Password | Setting |
+|---|---|---|---|
+| John Doe, guest of the website | `john.doe@gravitee.io` | `HelloWorld@123` | `ACME_HOTELS_DEMO_PASSWORD` |
+| Gamma and APIM consoles | `admin` | `admin` | `ACME_HOTELS_APIM_PASSWORD` |
+| Access Management console | `admin` | `adminadmin` | `ACME_HOTELS_AM_PASSWORD` |
+
+The two admin settings are the passwords the seed signs in with: set them if you changed those passwords in a console.
+
+| Secret | Value | Setting |
+|---|---|---|
+| Access Management application secrets | `hotel-ai-agent`, `hotel-mcp` | `ACME_HOTELS_AGENT_CLIENT_SECRET`, `ACME_HOTELS_MCP_RESOURCE_SECRET` |
+
+Set them before the first start. The seed writes the password and the secrets into Access Management when it creates them, and keeps what it finds on later runs, so on a lab that is already set up a new value needs a reset. Write `ACME_HOTELS_MCP_RESOURCE_SECRET` in letters, digits and dashes: the gateway's script for the bookings, which the seed also writes into the API, uses it in a string.
 
 ## Settings
 
@@ -70,7 +81,7 @@ Set them from the key button of the playground in the Lab UI. Compose reads a se
 
 The playground's own settings start with `ACME_HOTELS_`. `OLLAMA_URL` and `GEMINI_API_KEY` name a host service and keep its common name.
 
-The demo secrets are settings too: `ACME_HOTELS_DEMO_PASSWORD`, `ACME_HOTELS_AGENT_CLIENT_SECRET` and `ACME_HOTELS_MCP_RESOURCE_SECRET`. Set them before the first start. The seed writes the password and the secrets into Access Management when it creates them, and keeps what it finds on later runs, so on a lab that is already set up a new value needs a reset. Write `ACME_HOTELS_MCP_RESOURCE_SECRET` in letters, digits and dashes: the gateway's script for the bookings, which the seed also writes into the API, uses it in a string.
+The demo secrets and passwords are settings too: they are in [Logins and secrets](#logins-and-secrets).
 
 ## What you learn
 
@@ -99,7 +110,7 @@ The lessons can be done again as they are: the cache forgets an entry after a mi
 - the images built here
 - two files on your machine: the record of what the seed created, which is empty after a removal, and your settings
 
-**Reset**, in the Stack page's menu, deletes every container and volume, and empties the record. It leaves the plugin, the images and your settings.
+**Reset**, in the Containers page's menu, deletes every container and volume, and empties the record. It leaves the plugin, the images and your settings.
 
 ## More
 
