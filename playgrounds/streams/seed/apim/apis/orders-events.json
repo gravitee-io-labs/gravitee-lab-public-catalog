@@ -1,0 +1,322 @@
+{
+  "api": {
+    "definitionVersion": "V4",
+    "type": "MESSAGE",
+    "crossId": "event-streams-orders-events",
+    "name": "Orders Events",
+    "apiVersion": "1.0",
+    "description": "The orders stream of Acme Shop as HTTP: POST an order, GET or stream the new ones, or have them pushed to your webhook. The Kafka topic stays behind the gateway.",
+    "state": "STARTED",
+    "lifecycleState": "PUBLISHED",
+    "visibility": "PUBLIC",
+    "labels": [
+      "kafka",
+      "events"
+    ],
+    "tags": [],
+    "groups": [],
+    "listeners": [
+      {
+        "type": "HTTP",
+        "paths": [
+          {
+            "path": "/orders/",
+            "overrideAccess": false
+          }
+        ],
+        "pathMappings": [],
+        "cors": {
+          "enabled": true,
+          "allowOrigin": [
+            "*"
+          ],
+          "allowMethods": [
+            "GET",
+            "POST",
+            "OPTIONS"
+          ],
+          "allowHeaders": [
+            "accept",
+            "content-type",
+            "x-gravitee-api-key",
+            "x-gravitee-client-identifier",
+            "last-event-id"
+          ],
+          "exposeHeaders": [
+            "x-gravitee-client-identifier"
+          ],
+          "allowCredentials": false,
+          "maxAge": 3600,
+          "runPolicies": false
+        },
+        "entrypoints": [
+          {
+            "type": "http-post",
+            "qos": "AUTO",
+            "configuration": {
+              "requestHeadersToMessage": false,
+              "produceEmptyMessageFlow": false,
+              "statusOverride": 202
+            }
+          },
+          {
+            "type": "http-get",
+            "qos": "AUTO",
+            "configuration": {
+              "messagesLimitCount": 20,
+              "messagesLimitDurationMs": 5000,
+              "headersInPayload": false,
+              "metadataInPayload": false,
+              "statusOverride": 200
+            }
+          },
+          {
+            "type": "sse",
+            "qos": "AUTO",
+            "configuration": {
+              "heartbeatIntervalInMs": 5000,
+              "metadataAsComment": false,
+              "headersAsComment": false
+            }
+          }
+        ]
+      },
+      {
+        "type": "SUBSCRIPTION",
+        "entrypoints": [
+          {
+            "type": "webhook",
+            "qos": "AUTO",
+            "configuration": {
+              "interruptConsumptionOnServerError": false,
+              "interruptConsumptionOnException": false
+            }
+          }
+        ]
+      }
+    ],
+    "endpointGroups": [
+      {
+        "name": "Kafka",
+        "type": "kafka",
+        "loadBalancer": {
+          "type": "ROUND_ROBIN"
+        },
+        "sharedConfiguration": "{\"consumer\": {\"enabled\": true, \"topics\": [\"acme.orders.v1\"], \"autoOffsetReset\": \"earliest\", \"encodeMessageId\": true, \"removeConfluentHeaders\": false}, \"security\": {\"protocol\": \"PLAINTEXT\"}, \"producer\": {\"enabled\": true, \"topics\": [\"acme.orders.v1\"], \"compressionType\": \"none\"}}",
+        "endpoints": [
+          {
+            "name": "broker",
+            "type": "kafka",
+            "weight": 1,
+            "inheritConfiguration": true,
+            "configuration": {
+              "bootstrapServers": "${STREAMS_BROKER_BOOTSTRAP}"
+            },
+            "services": {},
+            "secondary": false,
+            "tenants": []
+          }
+        ],
+        "services": {}
+      }
+    ],
+    "flowExecution": {
+      "mode": "DEFAULT",
+      "matchRequired": false
+    },
+    "flows": [
+      {
+        "name": "Shape the stream",
+        "enabled": true,
+        "selectors": [
+          {
+            "type": "CHANNEL",
+            "operations": [
+              "SUBSCRIBE"
+            ],
+            "channel": "/",
+            "channelOperator": "STARTS_WITH"
+          }
+        ],
+        "request": [],
+        "response": [],
+        "publish": [],
+        "subscribe": [
+          {
+            "name": "Only high-value orders",
+            "description": "Drops the orders under 500 before any reader gets them",
+            "enabled": false,
+            "policy": "message-filtering",
+            "configuration": {
+              "filter": "{#jsonPath(#message.content, '$.amount') >= 500}",
+              "ackFilteredMessage": true,
+              "filterMessageOnFilteringError": true
+            }
+          },
+          {
+            "name": "Notification payload",
+            "description": "Reshapes the order into the notification a reader wants: no email, no card, the amount as total",
+            "enabled": false,
+            "policy": "json-to-json",
+            "configuration": {
+              "scope": "RESPONSE",
+              "overrideContentType": true,
+              "specification": "[{\"operation\": \"shift\", \"spec\": {\"orderId\": \"id\", \"customer\": \"customer\", \"country\": \"country\", \"amount\": \"total\", \"currency\": \"currency\", \"status\": \"status\"}}]"
+            }
+          }
+        ],
+        "tags": []
+      }
+    ],
+    "analytics": {
+      "enabled": true
+    }
+  },
+  "plans": [
+    {
+      "definitionVersion": "V4",
+      "type": "API",
+      "status": "PUBLISHED",
+      "validation": "AUTO",
+      "tags": [],
+      "characteristics": [],
+      "excludedGroups": [],
+      "commentRequired": false,
+      "name": "API key",
+      "description": "Read and write over HTTP with an API key",
+      "mode": "STANDARD",
+      "order": 1,
+      "security": {
+        "type": "API_KEY",
+        "configuration": {
+          "source": "HEADER",
+          "propagateApiKey": false
+        }
+      },
+      "flows": []
+    },
+    {
+      "definitionVersion": "V4",
+      "type": "API",
+      "status": "PUBLISHED",
+      "validation": "AUTO",
+      "tags": [],
+      "characteristics": [],
+      "excludedGroups": [],
+      "commentRequired": false,
+      "name": "Webhook",
+      "description": "The gateway calls your URL on each order",
+      "mode": "PUSH",
+      "order": 2,
+      "flows": []
+    },
+    {
+      "definitionVersion": "V4",
+      "type": "API",
+      "status": "PUBLISHED",
+      "validation": "AUTO",
+      "tags": [],
+      "characteristics": [],
+      "excludedGroups": [],
+      "commentRequired": false,
+      "name": "France",
+      "description": "The orders shipped to France, and only those",
+      "mode": "STANDARD",
+      "order": 3,
+      "security": {
+        "type": "API_KEY",
+        "configuration": {
+          "source": "HEADER",
+          "propagateApiKey": false
+        }
+      },
+      "flows": [
+        {
+          "name": "France only",
+          "enabled": true,
+          "selectors": [
+            {
+              "type": "CHANNEL",
+              "operations": [
+                "SUBSCRIBE"
+              ],
+              "channel": "/",
+              "channelOperator": "STARTS_WITH"
+            }
+          ],
+          "request": [],
+          "response": [],
+          "publish": [],
+          "subscribe": [
+            {
+              "name": "Only FR orders",
+              "description": "Keeps the orders shipped to FR: the partner's contract",
+              "enabled": true,
+              "policy": "message-filtering",
+              "configuration": {
+                "filter": "{#jsonPath(#message.content, '$.country') == 'FR'}",
+                "ackFilteredMessage": true,
+                "filterMessageOnFilteringError": true
+              }
+            }
+          ],
+          "tags": []
+        }
+      ]
+    },
+    {
+      "definitionVersion": "V4",
+      "type": "API",
+      "status": "PUBLISHED",
+      "validation": "AUTO",
+      "tags": [],
+      "characteristics": [],
+      "excludedGroups": [],
+      "commentRequired": false,
+      "name": "Germany",
+      "description": "The orders shipped to Germany, and only those",
+      "mode": "STANDARD",
+      "order": 4,
+      "security": {
+        "type": "API_KEY",
+        "configuration": {
+          "source": "HEADER",
+          "propagateApiKey": false
+        }
+      },
+      "flows": [
+        {
+          "name": "Germany only",
+          "enabled": true,
+          "selectors": [
+            {
+              "type": "CHANNEL",
+              "operations": [
+                "SUBSCRIBE"
+              ],
+              "channel": "/",
+              "channelOperator": "STARTS_WITH"
+            }
+          ],
+          "request": [],
+          "response": [],
+          "publish": [],
+          "subscribe": [
+            {
+              "name": "Only DE orders",
+              "description": "Keeps the orders shipped to DE: the partner's contract",
+              "enabled": true,
+              "policy": "message-filtering",
+              "configuration": {
+                "filter": "{#jsonPath(#message.content, '$.country') == 'DE'}",
+                "ackFilteredMessage": true,
+                "filterMessageOnFilteringError": true
+              }
+            }
+          ],
+          "tags": []
+        }
+      ]
+    }
+  ]
+}

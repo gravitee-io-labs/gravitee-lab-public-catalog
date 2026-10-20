@@ -1,0 +1,2 @@
+name: streams
+description: The company's SSO, which the partners' applications sign in to before they read the orders over Kafka

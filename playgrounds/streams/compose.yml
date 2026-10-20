@@ -1,0 +1,246 @@
+# Demo secrets shared by the accounts, the apps and the seed; change one in the shell or in playgrounds/streams/.env
+x-streams-secrets:
+  apim-password: &apim-password ${STREAMS_APIM_PASSWORD:-admin}   # Password of user admin in API Management, which the seed and the app's policy switches sign in with
+  orders-key: &orders-key ${STREAMS_ORDERS_KEY:-streams-orders-key}   # API key of the Order dashboard application on the Orders Events API
+  partner-fr-key: &partner-fr-key ${STREAMS_PARTNER_FR_KEY:-streams-partner-fr-key}   # API key of the Partner France application, on the France plan of the Orders Events API
+  partner-de-key: &partner-de-key ${STREAMS_PARTNER_DE_KEY:-streams-partner-de-key}   # API key of the Partner Germany application, on the Germany plan
+  partner-secret: &partner-secret ${STREAMS_PARTNER_SECRET:-streams-partner-secret}   # Client secret of the Partner portal application in Access Management, with which it gets its tokens
+  am-password: &am-password ${STREAMS_AM_PASSWORD:-adminadmin}   # Password of user admin in Access Management, which the seed signs in with
+  encryption-key: &encryption-key ${STREAMS_ENCRYPTION_KEY:-Z3Jhdml0ZWUtbGFiLWRlbW8tYWVzMjU2LWtleS0wMDE=}   # Base64 AES-256 key with which the gateway encrypts the card and the email of an order in Kafka; a new value makes messages already in the topic unreadable
+  blob-connection: &blob-connection ${STREAMS_BLOB_CONNECTION_STRING:-DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=${STREAMS_BLOB_ACCOUNT_KEY:-Z3Jhdml0ZWUtbGFiLWRlbW8tYXp1cmUtYmxvYi1hY2NvdW50LWtleS0wMDAx};BlobEndpoint=http://azurite:10000/devstoreaccount1;}   # Connection string of the Azurite account where the gateway offloads large messages, with the key of STREAMS_BLOB_ACCOUNT_KEY
+
+x-gravitee:
+  kind: playground
+  name: Event Streams Management with Kafka
+  category: Event
+  description: Kafka orders stream exposed by Gravitee over HTTP, SSE and webhooks and as a native Kafka API with mTLS, SSO, governance, observability and payload protection
+  tags: [Kafka, Native Kafka, mTLS, SNI, SSO, SSE, Webhook, Avro, Governance, Encryption, Offloading]
+  duration: 70 min
+  first_start: 6 min
+  requires:
+    images:
+      APIM_VERSION: "4.12.20"
+    plugins:
+      apim: [gravitee-resource-storage-azure-blob]
+    license:
+      apim-en-message-reactor: Lessons 1 to 6
+      apim-en-endpoint-kafka: Lessons 1 to 6
+      apim-native-kafka-reactor: Lessons 7 to 12
+      apim-native-kafka-policy-acl: Lessons 7 to 12
+      apim-native-kafka-policy-topic-mapping: Lessons 7 to 12
+      apim-native-kafka-policy-rules: Lesson 10
+      apim-native-kafka-policy-quota: Lesson 10
+      apim-native-kafka-policy-encryption: Lesson 12
+      apim-native-kafka-policy-offloading: Lesson 12
+  tested:
+    - APIM_VERSION: "4.12.20"
+      APIM_REGISTRY: graviteeio
+    - APIM_VERSION: "4.12.23"
+      APIM_REGISTRY: graviteeio
+  consoles:
+    - streams-app
+    - apim-management-ui
+  terminal: streams-tools   # its shell, under the UIs: where the guide's commands run
+  accounts:
+    - for: APIM Console and Developer Portal, the platform team
+      username: admin
+      password: *apim-password
+    - for: Order dashboard application, the API key of the Orders Events API
+      key: *orders-key
+    - for: Partner France application, the API key of its France plan
+      key: *partner-fr-key
+    - for: Partner Germany application, the API key of its Germany plan
+      key: *partner-de-key
+    - for: Access Management Console, the identity provider of the partner SSO
+      username: admin
+      password: *am-password
+    - for: Partner portal application, the client secret with which it gets its tokens
+      key: *partner-secret
+
+include:
+  - ../../addons/kafka/compose.yml   # The broker, its UI and the gateway's Kafka entrypoint
+  - ../../addons/azurite/compose.yml   # Where the gateway offloads large messages
+  - ../../addons/schema-registry/compose.yml   # Where the Avro schemas of the orders are
+
+x-streams-healthcheck: &app-healthcheck
+  test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+  interval: 5s
+  timeout: 3s
+  retries: 20
+
+services:
+
+  azurite:
+    environment:
+      AZURITE_ACCOUNTS: devstoreaccount1:${STREAMS_BLOB_ACCOUNT_KEY:-Z3Jhdml0ZWUtbGFiLWRlbW8tYXp1cmUtYmxvYi1hY2NvdW50LWtleS0wMDAx}   # The key of the emulator's one account, so that the gateway signs its requests with a demo key of this playground
+
+  streams-certs:
+    image: alpine/openssl:${STREAMS_OPENSSL_VERSION:-${KAFKA_CERTS_VERSION:-3.5.9}}   # OpenSSL version (image tag), which makes the client certificates
+    container_name: gio-streams-certs
+    restart: "no"
+    entrypoint: ["sh", "/certs.sh"]   # Makes the client certificates that are missing in /certs, then exits
+    volumes:
+      - data-streams-certs:/certs
+      - ./init/certs.sh:/certs.sh:ro
+    labels:
+      io.gravitee.name: Client certificates
+      io.gravitee.description: Makes the certificates of the two Kafka clients of the lessons, the fulfillment service and a stranger, then exits
+    networks:
+      - internal
+
+  streams-hosts:
+    image: alpine/socat:${STREAMS_SOCAT_VERSION:-1.8.0.3}   # socat version (image tag), which forwards the Kafka host names to the gateway
+    container_name: gio-streams-hosts
+    restart: unless-stopped
+    command: ["TCP-LISTEN:9092,fork,reuseaddr", "TCP:apim-gateway:9092"]   # Raw TCP: the TLS handshake, and the host name in it, reach the gateway untouched
+    labels:
+      io.gravitee.name: Kafka host names
+      io.gravitee.description: Answers to the host names of the Kafka APIs inside Docker and forwards the connections to the gateway
+    networks:
+      internal:
+        aliases:   # What a Kafka client resolves inside Docker: on your machine they go in /etc/hosts. The broker names are what the gateway hands back in its metadata
+          - orders.kafka.local
+          - broker-0-orders.kafka.local
+          - payments.kafka.local
+          - broker-0-payments.kafka.local
+          - partners.kafka.local
+          - broker-0-partners.kafka.local
+
+  streams-app:
+    image: ghcr.io/gravitee-io-labs/gravitee-lab-public-catalog/streams-app:latest
+    build: ./apps/streams-app
+    pull_policy: ${STREAMS_PULL_POLICY:-build}   # build: build it here at each start; always: pull it, build it here if it cannot be pulled
+    container_name: gio-streams-app
+    restart: unless-stopped
+    depends_on:
+      streams-certs:
+        condition: service_completed_successfully
+      kafka:
+        condition: service_healthy
+      azurite:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+      streams-hosts:
+        condition: service_started
+    ports:
+      - "127.0.0.1:8170:8000"   # The demo page: a producer, a consumer and the broker's own view of the topic
+    volumes:
+      - data-streams-certs:/certs:ro
+      - ../../addons/kafka/.state/certs:/kafka-certs:ro   # The gateway's certificate, which the Kafka clients trust
+    environment:
+      ALLOWED_HOSTS: streams-app,localhost,127.0.0.1,[::1]   # The host names it answers to
+      STREAMS_GATEWAY_URL: http://apim-gateway:8082   # The gateway, as the app calls the HTTP APIs
+      STREAMS_ORDERS_KEY: *orders-key
+      STREAMS_KAFKA_ORDERS: orders.kafka.local:9092   # Bootstrap of the Orders Kafka API: the host in it is what the gateway routes on (SNI)
+      STREAMS_KAFKA_PAYMENTS: payments.kafka.local:9092   # Bootstrap of the Payments Kafka API
+      STREAMS_KAFKA_PARTNERS: partners.kafka.local:9092   # Bootstrap of the Partners Kafka API, which partners reach with a token of the SSO
+      STREAMS_TOKEN_URL: http://am-gateway:8092/streams/oauth/token   # The SSO's token endpoint, where the Partner portal application gets its tokens
+      STREAMS_PARTNER_SECRET: *partner-secret
+      STREAMS_PARTNER_FR_KEY: *partner-fr-key
+      STREAMS_PARTNER_DE_KEY: *partner-de-key
+      STREAMS_REGISTRY_URL: http://schema-registry:8081   # The schema registry of the Avro orders
+      STREAMS_CONSOLE_URL: http://localhost:8084   # The APIM Console, as the page links to it
+      STREAMS_BROKER: kafka:9091   # The broker itself, plaintext, to show what is really stored
+      STREAMS_BROKER_TOPIC: acme.orders.v1   # The topic of the orders on the broker
+      STREAMS_MANAGEMENT_URL: http://apim-management-api:8083   # Where the policy switches change the APIs
+      STREAMS_MANAGEMENT_PASSWORD: *apim-password
+      STREAMS_BLOB_CONNECTION: *blob-connection
+    labels:
+      io.gravitee.name: Demo App
+      io.gravitee.description: Orders producer and consumer on one side each, with the broker's own view of the topic between them
+      io.gravitee.console.streams-app.name: Demo App
+      io.gravitee.console.streams-app.url: http://localhost:8170
+    healthcheck:
+      <<: *app-healthcheck
+    networks:
+      - internal
+
+  streams-tools:
+    image: ghcr.io/gravitee-io-labs/gravitee-lab-public-catalog/streams-tools:latest
+    build: ./apps/streams-tools
+    pull_policy: ${STREAMS_PULL_POLICY:-build}
+    container_name: gio-streams-tools
+    restart: unless-stopped
+    init: true   # sleep alone as the first process ignores the stop signal and leaves the shell's finished commands as zombies
+    depends_on:
+      streams-certs:
+        condition: service_completed_successfully
+    volumes:
+      - data-streams-certs:/certs:ro
+      - ../../addons/kafka/.state/certs:/kafka-certs:ro
+    environment:   # What the terminal's shell has: the addresses, and the key that the lessons use
+      GATEWAY: http://apim-gateway:8082
+      STREAMS_APP: http://streams-app:8000
+      ORDERS_KEY: *orders-key
+      KAFKA_ORDERS: orders.kafka.local:9092
+      KAFKA_PAYMENTS: payments.kafka.local:9092
+      KAFKA_PARTNERS: partners.kafka.local:9092
+      TOKEN_URL: http://am-gateway:8092/streams/oauth/token   # The SSO's token endpoint
+      PARTNER_SECRET: *partner-secret   # Client secret of the Partner portal application
+      PARTNER_FR_KEY: *partner-fr-key
+      PARTNER_DE_KEY: *partner-de-key
+      REGISTRY: http://schema-registry:8081
+    labels:
+      io.gravitee.name: Terminal tools
+      io.gravitee.description: The shell of the terminal beside the guide, with curl, jq, openssl and kcat and the certificates of the lessons
+    networks:
+      - internal
+
+  streams-seed:
+    image: ghcr.io/gravitee-io-labs/gravitee-lab/seeder:latest
+    build: ../../../../../seeder
+    pull_policy: ${STREAMS_PULL_POLICY:-build}
+    container_name: gio-streams-seed
+    restart: "no"
+    entrypoint: ["sh", "/seed.sh"]   # Hands the fulfillment certificate to the seed, then runs it
+    depends_on:
+      apim-management-api:
+        condition: service_healthy
+      streams-certs:
+        condition: service_completed_successfully
+      azurite:
+        condition: service_healthy
+      am-management-api:
+        condition: service_healthy
+    volumes:
+      - ./seed:/seed:ro
+      - ./.state:/state   # What the seed created, to remove it later
+      - data-streams-certs:/certs:ro
+      - ./init/seed.sh:/seed.sh:ro
+      - ./init/portal.py:/portal.py:ro
+      - ./init/overview-events.md:/overview-events.md:ro
+      - ./init/overview-avro.md:/overview-avro.md:ro
+    environment:
+      APIM_MANAGEMENT_URL: http://apim-management-api:8083
+      APIM_USERNAME: admin
+      APIM_PASSWORD: *apim-password
+      GATEWAY_INTERNAL_URL: http://apim-gateway:8082   # The gateway, as the seed reaches it: it waits until every API is served
+      APIM_GATEWAY_URL: http://localhost:8082   # The gateway, as the portal tells your browser to call it
+      AM_MANAGEMENT_URL: http://am-management-api:8093
+      AM_USERNAME: admin
+      AM_PASSWORD: *am-password
+      STREAMS_BROKER_BOOTSTRAP: kafka:9091   # The broker, as the gateway reaches it
+      STREAMS_REGISTRY_URL: http://schema-registry:8081   # The schema registry, as the gateway reaches it
+      STREAMS_AM_JWKS_URL: http://am-gateway:8092/streams/oidc/.well-known/jwks.json   # The signing keys of the SSO's tokens, as the gateway reaches them
+      STREAMS_ORDERS_KEY: *orders-key
+      STREAMS_PARTNER_FR_KEY: *partner-fr-key
+      STREAMS_PARTNER_DE_KEY: *partner-de-key
+      STREAMS_PARTNER_SECRET: *partner-secret
+      STREAMS_ENCRYPTION_KEY: *encryption-key
+      STREAMS_FULFILLMENT_CERT: set-by-seed-sh   # Replaced by seed.sh with the certificate in /certs, which the seed writes into the application
+      STREAMS_BILLING_CERT: set-by-seed-sh   # The same for the Billing service
+      STREAMS_BLOB_CONNECTION: *blob-connection
+    labels:
+      io.gravitee.name: Playground seed
+      io.gravitee.description: Sets up the orders APIs, their plans, the dashboard application and its key on the platform
+      io.gravitee.role: seed
+    networks:
+      - internal
+
+  apim-gateway:   # a core service: only the keys the playground needs
+    environment:
+      gravitee_kafka_ssl_clientAuth: request   # The gateway asks every client for a certificate and an mTLS plan insists on one, while a client of a token plan can come without
+
+volumes:
+  data-streams-certs:

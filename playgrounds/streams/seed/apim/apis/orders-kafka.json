@@ -1,0 +1,371 @@
+{
+  "api": {
+    "definitionVersion": "V4",
+    "type": "NATIVE",
+    "crossId": "event-streams-orders-kafka",
+    "name": "Orders Kafka",
+    "apiVersion": "1.0",
+    "description": "The orders topic as a native Kafka API: plain Kafka clients connect to orders.kafka.local with their certificate",
+    "state": "STARTED",
+    "lifecycleState": "PUBLISHED",
+    "visibility": "PRIVATE",
+    "labels": [
+      "kafka"
+    ],
+    "tags": [],
+    "groups": [],
+    "listeners": [
+      {
+        "type": "KAFKA",
+        "host": "orders",
+        "entrypoints": [
+          {
+            "type": "native-kafka",
+            "configuration": {}
+          }
+        ]
+      }
+    ],
+    "endpointGroups": [
+      {
+        "name": "Broker",
+        "type": "native-kafka",
+        "loadBalancer": {
+          "type": "ROUND_ROBIN"
+        },
+        "sharedConfiguration": "{\"security\": {\"protocol\": \"PLAINTEXT\"}}",
+        "endpoints": [
+          {
+            "name": "broker",
+            "type": "native-kafka",
+            "weight": 1,
+            "inheritConfiguration": true,
+            "configuration": {
+              "bootstrapServers": "${STREAMS_BROKER_BOOTSTRAP}"
+            },
+            "secondary": false,
+            "tenants": []
+          }
+        ]
+      }
+    ],
+    "flows": [
+      {
+        "name": "Orders policies",
+        "enabled": true,
+        "selectors": [],
+        "connect": [],
+        "tags": [],
+        "interact": [
+          {
+            "name": "Only its own topics",
+            "description": "The client sees and uses orders and the topics it creates under orders-, and no other topic of the broker",
+            "enabled": true,
+            "policy": "kafka-acl",
+            "configuration": {
+              "authorizations": [
+                {
+                  "resources": [
+                    {
+                      "type": "TOPIC",
+                      "resourcePatternType": "LITERAL",
+                      "resourcePattern": "orders",
+                      "operations": [
+                        "TOPIC_READ",
+                        "TOPIC_WRITE",
+                        "TOPIC_DESCRIBE",
+                        "TOPIC_DESCRIBE_CONFIGS"
+                      ]
+                    },
+                    {
+                      "type": "TOPIC",
+                      "resourcePatternType": "PREFIXED",
+                      "resourcePattern": "orders-",
+                      "operations": [
+                        "TOPIC_READ",
+                        "TOPIC_WRITE",
+                        "TOPIC_DESCRIBE",
+                        "TOPIC_DESCRIBE_CONFIGS",
+                        "TOPIC_CREATE"
+                      ]
+                    },
+                    {
+                      "type": "GROUP",
+                      "resourcePatternType": "ANY",
+                      "operations": [
+                        "GROUP_READ",
+                        "GROUP_DESCRIBE"
+                      ]
+                    },
+                    {
+                      "type": "CLUSTER",
+                      "operations": [
+                        "CLUSTER_DESCRIBE"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "name": "Topic guardrails",
+            "description": "A new topic is named orders-something in lower case and has at most 3 partitions",
+            "enabled": false,
+            "policy": "kafka-create-topic-rules",
+            "configuration": {
+              "topicPatterns": [],
+              "preventAutoTopicCreation": true,
+              "topicNamePatternEnabled": true,
+              "topicNamePattern": {
+                "pattern": "^orders-[a-z0-9-]+$",
+                "action": "FORBID"
+              },
+              "numPartitionsEnabled": true,
+              "numPartitions": {
+                "operator": "GT",
+                "threshold": 3,
+                "action": "FORBID"
+              }
+            }
+          },
+          {
+            "name": "Client topic is orders",
+            "description": "Clients say orders, the broker's topic is acme.orders.v1",
+            "enabled": true,
+            "policy": "kafka-topic-mapping",
+            "configuration": {
+              "mode": "RENAME",
+              "mappings": [
+                {
+                  "client": "orders",
+                  "broker": "acme.orders.v1"
+                }
+              ]
+            }
+          }
+        ],
+        "publish": [
+          {
+            "name": "Safe producers",
+            "description": "A producer waits for an acknowledgement (no acks=0) and tags each record with an x-trace header",
+            "enabled": false,
+            "policy": "kafka-produce-rules",
+            "configuration": {
+              "topicPatterns": [],
+              "acksEnabled": true,
+              "acks": {
+                "operator": "EQ",
+                "threshold": 0,
+                "action": "FORBID"
+              },
+              "headerEnabled": true,
+              "headers": [
+                {
+                  "matchType": "REQUIRED",
+                  "namePattern": "x-trace",
+                  "action": "FORBID"
+                }
+              ]
+            }
+          },
+          {
+            "name": "Byte quota",
+            "description": "A producer or a consumer gets 4 KB a second, then the gateway tells its client to slow down",
+            "enabled": false,
+            "policy": "kafka-quota",
+            "configuration": {
+              "key": "",
+              "useKeyOnly": false,
+              "limit": {
+                "value": 4,
+                "unit": "Kilobytes"
+              }
+            }
+          },
+          {
+            "name": "Encrypt card and email",
+            "description": "AES-256-GCM on two fields of the order before it reaches the broker",
+            "enabled": false,
+            "policy": "kafka-message-encryption-decryption",
+            "configuration": {
+              "keyStore": {
+                "storeType": "NONE",
+                "keyValue": "${STREAMS_ENCRYPTION_KEY}"
+              },
+              "processingScope": {
+                "scopeType": "JSON_INDIVIDUAL_FIELDS",
+                "fields": [
+                  {
+                    "fieldPath": "$.card",
+                    "fieldType": "STRING"
+                  },
+                  {
+                    "fieldPath": "$.email",
+                    "fieldType": "STRING"
+                  }
+                ]
+              },
+              "encryption": {
+                "mode": "DIRECT_RAW_BASE64",
+                "keyId": "orders-key-1",
+                "algorithm": "AES_256_GCM"
+              },
+              "decryption": {
+                "mode": "DIRECT_RAW_BASE64",
+                "keyId": "orders-key-1",
+                "algorithm": "AES_256_GCM"
+              },
+              "metadataConfiguration": {
+                "placementType": "KAFKA_HEADER",
+                "headerPrefix": "X-Gravitee-Encryption-"
+              },
+              "compressionConfiguration": {
+                "compressionAlgorithm": "NONE"
+              }
+            }
+          },
+          {
+            "name": "Offload large orders",
+            "description": "Orders over 50 KB go to Azurite, the record keeps a pointer",
+            "enabled": false,
+            "policy": "kafka-offloading",
+            "configuration": {
+              "storage": {
+                "resourceName": "offload-store"
+              },
+              "header": {
+                "name": "__GIO_OFFLOADING_POLICY"
+              },
+              "activation": {
+                "size": 50,
+                "unit": "Kilobytes"
+              }
+            }
+          }
+        ],
+        "subscribe": [
+          {
+            "name": "Byte quota (read)",
+            "description": "A consumer gets 4 KB a second too",
+            "enabled": false,
+            "policy": "kafka-quota",
+            "configuration": {
+              "key": "",
+              "useKeyOnly": false,
+              "limit": {
+                "value": 4,
+                "unit": "Kilobytes"
+              }
+            }
+          },
+          {
+            "name": "Only high-value orders",
+            "description": "Drops the orders under 500 before the consumer sees them",
+            "enabled": false,
+            "policy": "kafka-message-filtering",
+            "configuration": {
+              "filter": "{#jsonPath(#message.content, '$.amount') >= 500}",
+              "excludeMessagesOnError": false
+            }
+          },
+          {
+            "name": "Fetch offloaded orders",
+            "description": "Puts the offloaded content back into the record the consumer gets",
+            "enabled": false,
+            "policy": "kafka-offloading",
+            "configuration": {
+              "storage": {
+                "resourceName": "offload-store"
+              },
+              "header": {
+                "name": "__GIO_OFFLOADING_POLICY"
+              },
+              "activation": {
+                "size": 50,
+                "unit": "Kilobytes"
+              }
+            }
+          },
+          {
+            "name": "Decrypt card and email",
+            "description": "The consumer gets the clear fields back",
+            "enabled": false,
+            "policy": "kafka-message-encryption-decryption",
+            "configuration": {
+              "keyStore": {
+                "storeType": "NONE",
+                "keyValue": "${STREAMS_ENCRYPTION_KEY}"
+              },
+              "processingScope": {
+                "scopeType": "JSON_INDIVIDUAL_FIELDS",
+                "fields": [
+                  {
+                    "fieldPath": "$.card",
+                    "fieldType": "STRING"
+                  },
+                  {
+                    "fieldPath": "$.email",
+                    "fieldType": "STRING"
+                  }
+                ]
+              },
+              "encryption": {
+                "mode": "DIRECT_RAW_BASE64",
+                "keyId": "orders-key-1",
+                "algorithm": "AES_256_GCM"
+              },
+              "decryption": {
+                "mode": "DIRECT_RAW_BASE64",
+                "keyId": "orders-key-1",
+                "algorithm": "AES_256_GCM"
+              },
+              "metadataConfiguration": {
+                "placementType": "KAFKA_HEADER",
+                "headerPrefix": "X-Gravitee-Encryption-"
+              },
+              "compressionConfiguration": {
+                "compressionAlgorithm": "NONE"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "analytics": {
+      "enabled": true
+    },
+    "resources": [
+      {
+        "name": "offload-store",
+        "type": "storage-azure-blob",
+        "enabled": true,
+        "configuration": {
+          "connectionString": "${STREAMS_BLOB_CONNECTION}",
+          "defaultLocationName": "offloaded-orders"
+        }
+      }
+    ]
+  },
+  "plans": [
+    {
+      "definitionVersion": "V4",
+      "type": "API",
+      "status": "PUBLISHED",
+      "validation": "AUTO",
+      "tags": [],
+      "characteristics": [],
+      "excludedGroups": [],
+      "commentRequired": false,
+      "name": "mTLS",
+      "description": "Your client certificate is your identity",
+      "mode": "STANDARD",
+      "order": 1,
+      "security": {
+        "type": "MTLS",
+        "configuration": {}
+      },
+      "flows": []
+    }
+  ]
+}

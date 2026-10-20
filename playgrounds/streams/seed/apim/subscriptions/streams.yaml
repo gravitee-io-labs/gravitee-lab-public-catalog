@@ -1,0 +1,29 @@
+subscriptions:
+  - application: Order dashboard
+    api: Orders Events
+    plan: API key
+    apiKey: '${STREAMS_ORDERS_KEY}'
+  - application: Order dashboard
+    api: Orders Avro
+    plan: API key
+    apiKey: '${STREAMS_ORDERS_KEY}'
+  - application: Partner France
+    api: Orders Events
+    plan: France
+    apiKey: '${STREAMS_PARTNER_FR_KEY}'
+  - application: Partner Germany
+    api: Orders Events
+    plan: Germany
+    apiKey: '${STREAMS_PARTNER_DE_KEY}'
+  - application: Fulfillment service
+    api: Orders Kafka
+    plan: mTLS
+  - application: Fulfillment service
+    api: Payments Kafka
+    plan: mTLS
+  - application: Billing service
+    api: Orders Kafka
+    plan: mTLS
+  - application: Partner portal
+    api: Partners Kafka
+    plan: SSO token

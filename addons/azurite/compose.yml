@@ -1,0 +1,31 @@
+x-gravitee:
+  kind: addon
+  name: Azurite
+  category: Event
+  description: Azure Blob Storage emulator, the local object store for the gateway's storage resources
+
+services:
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:${AZURITE_VERSION:-3.35.0}   # Azurite version (image tag)
+    container_name: gio-azurite
+    restart: unless-stopped
+    command: ["azurite-blob", "--blobHost", "0.0.0.0", "--blobPort", "10000", "--location", "/data", "--skipApiVersionCheck", "--loose"]   # Blob service only; --loose accepts what a real account would
+    ports:
+      - "127.0.0.1:10000:10000"   # Blob service (HTTP), the emulator's account devstoreaccount1
+    volumes:
+      - data-azurite:/data
+    labels:
+      io.gravitee.name: Azurite
+      io.gravitee.description: Azure Blob Storage emulator that keeps what the gateway offloads from messages
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 10000"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+    networks:
+      - internal
+
+volumes:
+  data-azurite:
