@@ -1,0 +1,5 @@
+name: Partner Germany
+description: A retail partner that reads the orders shipped to Germany
+settings:
+  app:
+    type: SIMPLE

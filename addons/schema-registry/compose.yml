@@ -1,0 +1,35 @@
+x-gravitee:
+  kind: addon
+  name: Schema Registry
+  category: Event
+  description: Confluent Schema Registry that keeps the Avro schemas of the Kafka topics
+
+include:
+  - ../kafka/compose.yml
+
+services:
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:${SCHEMA_REGISTRY_VERSION:-7.9.0}   # Schema Registry version (image tag)
+    container_name: gio-schema-registry
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8097:8081"   # REST API of the registry
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9091   # The lab's broker, where the registry keeps its schemas in the topic _schemas
+    labels:
+      io.gravitee.name: Schema Registry
+      io.gravitee.description: Confluent Schema Registry, the schemas of the lab's Kafka topics
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8081/subjects >/dev/null"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 20s
+    networks:
+      - internal

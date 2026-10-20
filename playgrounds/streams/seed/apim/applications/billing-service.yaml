@@ -1,0 +1,7 @@
+name: Billing service
+description: A second native Kafka client, with a certificate of its own
+settings:
+  app:
+    type: SIMPLE
+  tls:
+    client_certificate: "${STREAMS_BILLING_CERT}"

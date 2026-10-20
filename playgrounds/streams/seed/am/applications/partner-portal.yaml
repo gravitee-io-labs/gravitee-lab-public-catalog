@@ -1,0 +1,15 @@
+# A partner's back-end application: it signs in with its client id and secret (client credentials) and gets a token that Kafka clients present
+name: Partner portal
+description: A partner's application that reads the orders as a Kafka client
+type: SERVICE
+
+clientId: partner-portal
+clientSecret: "${STREAMS_PARTNER_SECRET}"
+
+oauth:
+  grantTypes:
+    - client_credentials
+  tokenEndpointAuthMethod: client_secret_basic
+  pkce: false
+  tokenValidity:
+    accessToken: 3600
