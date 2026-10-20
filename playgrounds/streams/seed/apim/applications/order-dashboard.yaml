@@ -1,0 +1,5 @@
+name: Order dashboard
+description: Shows the orders of the shop live, over HTTP
+settings:
+  app:
+    type: SIMPLE

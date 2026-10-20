@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Event Streams Management with Kafka Demo App</title>
+<link rel="icon" href="/static/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/page.css">
+</head>
+<body>
+<header class="top">
+  <picture class="brand">
+    <source srcset="/static/logo-dark.svg" media="(prefers-color-scheme: dark)">
+    <img src="/static/logo-light.svg" alt="Gravitee" height="22">
+  </picture>
+  <span class="sep"></span>
+  <h1>Event Streams Management with Kafka Demo App</h1>
+  <div class="pills" id="pills" aria-label="Services"></div>
+</header>
+
+<section class="route" id="route" aria-label="Route of the last order">
+  <div class="stop" id="stop-producer"><b>Producer</b><span id="route-producer">Kafka client</span></div>
+  <div class="link" id="link-in"></div>
+  <div class="stop gateway" id="stop-gateway"><b>Gateway</b><span id="route-gateway">orders.kafka.local</span></div>
+  <div class="link" id="link-mid"></div>
+  <div class="stop" id="stop-broker"><b>Broker</b><span id="route-broker">acme.orders.v1</span></div>
+  <div class="link" id="link-out"></div>
+  <div class="stop" id="stop-consumer"><b>Consumer</b><span id="route-consumer">Kafka client</span></div>
+</section>
+
+<section class="switches" id="switches" aria-label="Policies"></section>
+
+<main class="grid">
+  <section class="card" id="producer">
+    <div class="head">
+      <h2>Producer</h2>
+      <div class="seg" id="producer-channel" role="tablist"></div>
+    </div>
+    <div class="opts" id="producer-kafka-opts">
+      <div class="field"><label>API</label><div class="seg small" id="producer-host"></div></div>
+      <div class="field"><label>Identity</label><div class="seg small" id="producer-identity"></div></div>
+    </div>
+    <div class="form" id="order-form">
+      <div class="field"><label for="amount">Amount</label><input id="amount" type="number" min="1" step="1" value="249"></div>
+      <div class="field"><label for="country">Country</label>
+        <select id="country"><option>FR</option><option>DE</option><option>ES</option><option>IT</option><option>US</option></select></div>
+      <div class="field grow"><label for="customer">Customer</label>
+        <select id="customer"><option value="">Random</option><option>Léa Martin</option><option>Noah Fischer</option><option>Sofía Ortega</option><option>Liam Brooks</option></select></div>
+    </div>
+    <div class="opts" id="producer-rules-opts">
+      <div class="field"><label>Acks</label><div class="seg small" id="producer-acks"></div></div>
+      <label class="check"><input type="checkbox" id="trace"> x-trace header</label>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="send">Send order</button>
+      <button class="btn" id="send-burst">Send 5</button>
+      <button class="btn" id="send-flood">Send 40</button>
+      <button class="btn" id="send-large">Send 120 KB</button>
+    </div>
+    <details class="command" id="topic-admin"><summary>Create a topic</summary>
+      <div class="opts">
+        <div class="field grow"><label for="topic-name">Name</label><input id="topic-name" type="text" value="orders-eu" maxlength="120"></div>
+        <div class="field"><label for="topic-partitions">Partitions</label><input id="topic-partitions" type="number" min="1" max="50" value="1"></div>
+        <button class="btn" id="topic-create">Create</button>
+      </div>
+    </details>
+    <details class="command" id="command"><summary>Command</summary><pre id="command-text"></pre><button class="btn small" id="command-copy">Copy</button></details>
+    <ol class="log" id="producer-log"></ol>
+  </section>
+
+  <section class="card" id="broker">
+    <div class="head">
+      <h2>Broker</h2>
+      <span class="chip">No gateway</span>
+      <button class="btn small ghost" id="broker-clear">Clear topics</button>
+    </div>
+    <ol class="records" id="broker-records"></ol>
+    <p class="empty" id="broker-empty">No records</p>
+  </section>
+
+  <section class="card" id="consumer">
+    <div class="head">
+      <h2>Consumer</h2>
+      <div class="seg" id="consumer-channel" role="tablist"></div>
+    </div>
+    <div class="opts" id="consumer-kafka-opts">
+      <div class="field"><label>API</label><div class="seg small" id="consumer-host"></div></div>
+      <div class="field"><label>Identity</label><div class="seg small" id="consumer-identity"></div></div>
+      <label class="check"><input type="checkbox" id="from-beginning"> From the start</label>
+    </div>
+    <div class="opts" id="consumer-http-opts" hidden>
+      <div class="field"><label>Key of</label><div class="seg small" id="consumer-who"></div></div>
+      <div class="field"><label>API</label><div class="seg small" id="consumer-api"></div></div>
+    </div>
+    <div class="opts" id="consumer-hook-opts" hidden>
+      <div class="field grow"><label>Callback URL</label><div class="copyline"><code id="hook-url"></code><button class="btn small" id="hook-copy">Copy</button></div></div>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="consume">Connect</button>
+      <span class="state" id="consumer-state">Idle</span>
+      <span class="grow"></span>
+      <span class="count" id="consumer-count">0</span>
+      <button class="btn small ghost" id="consumer-clear">Clear</button>
+    </div>
+    <ol class="messages" id="consumer-messages"></ol>
+    <p class="empty" id="consumer-empty">No messages</p>
+  </section>
+</main>
+
+<section class="lower">
+  <section class="card" id="sni">
+    <div class="head"><h2>SNI</h2>
+      <div class="seg small" id="sni-host"></div>
+      <button class="btn small" id="sni-probe">Probe</button>
+    </div>
+    <dl class="facts" id="sni-result"><dt>Host in the handshake</dt><dd>—</dd></dl>
+  </section>
+  <section class="card" id="blobs">
+    <div class="head"><h2>Azurite</h2><span class="chip">offloaded-orders</span><button class="btn small ghost" id="blobs-refresh">Refresh</button></div>
+    <ol class="blobs" id="blob-list"></ol>
+    <p class="empty" id="blob-empty">No blobs</p>
+    <pre class="preview" id="blob-preview" hidden></pre>
+  </section>
+  <section class="card" id="console">
+    <div class="head"><h2>Console</h2></div>
+    <ol class="blobs" id="console-links"></ol>
+  </section>
+</section>
+
+<script src="/static/page.js"></script>
+</body>
+</html>

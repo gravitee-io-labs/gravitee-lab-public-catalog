@@ -1,0 +1,157 @@
+{
+  "api": {
+    "definitionVersion": "V4",
+    "type": "NATIVE",
+    "crossId": "event-streams-partners-kafka",
+    "name": "Partners Kafka",
+    "apiVersion": "1.0",
+    "description": "The orders topic for partners that sign in with the company's SSO: read only, and the token is the identity",
+    "state": "STARTED",
+    "lifecycleState": "PUBLISHED",
+    "visibility": "PRIVATE",
+    "labels": [
+      "kafka"
+    ],
+    "tags": [],
+    "groups": [],
+    "listeners": [
+      {
+        "type": "KAFKA",
+        "host": "partners",
+        "entrypoints": [
+          {
+            "type": "native-kafka",
+            "configuration": {}
+          }
+        ]
+      }
+    ],
+    "endpointGroups": [
+      {
+        "name": "Broker",
+        "type": "native-kafka",
+        "loadBalancer": {
+          "type": "ROUND_ROBIN"
+        },
+        "sharedConfiguration": "{\"security\": {\"protocol\": \"PLAINTEXT\"}}",
+        "endpoints": [
+          {
+            "name": "broker",
+            "type": "native-kafka",
+            "weight": 1,
+            "inheritConfiguration": true,
+            "configuration": {
+              "bootstrapServers": "${STREAMS_BROKER_BOOTSTRAP}"
+            },
+            "secondary": false,
+            "tenants": []
+          }
+        ]
+      }
+    ],
+    "flows": [
+      {
+        "name": "Partners policies",
+        "enabled": true,
+        "selectors": [],
+        "connect": [],
+        "publish": [],
+        "subscribe": [],
+        "tags": [],
+        "interact": [
+          {
+            "name": "Read only, its own topic",
+            "description": "A partner reads orders and cannot write to it",
+            "enabled": true,
+            "policy": "kafka-acl",
+            "configuration": {
+              "authorizations": [
+                {
+                  "resources": [
+                    {
+                      "type": "TOPIC",
+                      "resourcePatternType": "LITERAL",
+                      "resourcePattern": "orders",
+                      "operations": [
+                        "TOPIC_READ",
+                        "TOPIC_DESCRIBE",
+                        "TOPIC_DESCRIBE_CONFIGS"
+                      ]
+                    },
+                    {
+                      "type": "GROUP",
+                      "resourcePatternType": "ANY",
+                      "operations": [
+                        "GROUP_READ",
+                        "GROUP_DESCRIBE"
+                      ]
+                    },
+                    {
+                      "type": "CLUSTER",
+                      "operations": [
+                        "CLUSTER_DESCRIBE"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "name": "Client topic is orders",
+            "description": "Clients say orders, the broker's topic is acme.orders.v1",
+            "enabled": true,
+            "policy": "kafka-topic-mapping",
+            "configuration": {
+              "mode": "RENAME",
+              "mappings": [
+                {
+                  "client": "orders",
+                  "broker": "acme.orders.v1"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "analytics": {
+      "enabled": true
+    }
+  },
+  "plans": [
+    {
+      "definitionVersion": "V4",
+      "type": "API",
+      "status": "PUBLISHED",
+      "validation": "AUTO",
+      "tags": [],
+      "characteristics": [],
+      "excludedGroups": [],
+      "commentRequired": false,
+      "name": "SSO token",
+      "description": "The partner presents a token from the company's identity provider",
+      "mode": "STANDARD",
+      "order": 1,
+      "security": {
+        "type": "JWT",
+        "configuration": {
+          "signature": "RSA_RS256",
+          "publicKeyResolver": "JWKS_URL",
+          "resolverParameter": "${STREAMS_AM_JWKS_URL}",
+          "connectTimeout": 2000,
+          "requestTimeout": 2000,
+          "followRedirects": false,
+          "useSystemProxy": false,
+          "extractClaims": false,
+          "propagateAuthHeader": false,
+          "userClaim": "sub",
+          "clientIdClaim": "client_id",
+          "checkRequiredScopes": false,
+          "modeStrict": true
+        }
+      },
+      "flows": []
+    }
+  ]
+}

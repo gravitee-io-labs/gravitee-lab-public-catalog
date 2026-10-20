@@ -1,0 +1,7 @@
+name: Fulfillment service
+description: Packs and ships the orders, as a native Kafka client that proves who it is with its certificate
+settings:
+  app:
+    type: SIMPLE
+  tls:
+    client_certificate: "${STREAMS_FULFILLMENT_CERT}"

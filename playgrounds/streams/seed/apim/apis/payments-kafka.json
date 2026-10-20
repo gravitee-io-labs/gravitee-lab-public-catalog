@@ -1,0 +1,144 @@
+{
+  "api": {
+    "definitionVersion": "V4",
+    "type": "NATIVE",
+    "crossId": "event-streams-payments-kafka",
+    "name": "Payments Kafka",
+    "apiVersion": "1.0",
+    "description": "A second native Kafka API on the same gateway port: the host name in the TLS handshake picks it",
+    "state": "STARTED",
+    "lifecycleState": "PUBLISHED",
+    "visibility": "PRIVATE",
+    "labels": [
+      "kafka"
+    ],
+    "tags": [],
+    "groups": [],
+    "listeners": [
+      {
+        "type": "KAFKA",
+        "host": "payments",
+        "entrypoints": [
+          {
+            "type": "native-kafka",
+            "configuration": {}
+          }
+        ]
+      }
+    ],
+    "endpointGroups": [
+      {
+        "name": "Broker",
+        "type": "native-kafka",
+        "loadBalancer": {
+          "type": "ROUND_ROBIN"
+        },
+        "sharedConfiguration": "{\"security\": {\"protocol\": \"PLAINTEXT\"}}",
+        "endpoints": [
+          {
+            "name": "broker",
+            "type": "native-kafka",
+            "weight": 1,
+            "inheritConfiguration": true,
+            "configuration": {
+              "bootstrapServers": "${STREAMS_BROKER_BOOTSTRAP}"
+            },
+            "secondary": false,
+            "tenants": []
+          }
+        ]
+      }
+    ],
+    "flows": [
+      {
+        "name": "Payments policies",
+        "enabled": true,
+        "selectors": [],
+        "connect": [],
+        "publish": [],
+        "subscribe": [],
+        "tags": [],
+        "interact": [
+          {
+            "name": "Only its own topic",
+            "description": "The client sees and uses payments and no other topic of the broker",
+            "enabled": true,
+            "policy": "kafka-acl",
+            "configuration": {
+              "authorizations": [
+                {
+                  "resources": [
+                    {
+                      "type": "TOPIC",
+                      "resourcePatternType": "LITERAL",
+                      "resourcePattern": "payments",
+                      "operations": [
+                        "TOPIC_READ",
+                        "TOPIC_WRITE",
+                        "TOPIC_DESCRIBE",
+                        "TOPIC_DESCRIBE_CONFIGS"
+                      ]
+                    },
+                    {
+                      "type": "GROUP",
+                      "resourcePatternType": "ANY",
+                      "operations": [
+                        "GROUP_READ",
+                        "GROUP_DESCRIBE"
+                      ]
+                    },
+                    {
+                      "type": "CLUSTER",
+                      "operations": [
+                        "CLUSTER_DESCRIBE"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "name": "Client topic is payments",
+            "description": "Clients say payments, the broker's topic is acme.payments.v1",
+            "enabled": true,
+            "policy": "kafka-topic-mapping",
+            "configuration": {
+              "mode": "RENAME",
+              "mappings": [
+                {
+                  "client": "payments",
+                  "broker": "acme.payments.v1"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "analytics": {
+      "enabled": true
+    }
+  },
+  "plans": [
+    {
+      "definitionVersion": "V4",
+      "type": "API",
+      "status": "PUBLISHED",
+      "validation": "AUTO",
+      "tags": [],
+      "characteristics": [],
+      "excludedGroups": [],
+      "commentRequired": false,
+      "name": "mTLS",
+      "description": "Your client certificate is your identity",
+      "mode": "STANDARD",
+      "order": 1,
+      "security": {
+        "type": "MTLS",
+        "configuration": {}
+      },
+      "flows": []
+    }
+  ]
+}

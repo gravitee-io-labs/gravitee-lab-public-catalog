@@ -1,0 +1,17 @@
+portalNext:
+  access:
+    enabled: true
+  siteTitle: Acme Shop events
+  banner:
+    enabled: true
+    title: Acme Shop events
+    subtitle: "The orders stream, over HTTP, SSE and webhooks."
+portal:
+  userCreation:
+    enabled: false
+plan:
+  security:
+    customApiKey:
+      enabled: true
+    push:
+      enabled: true

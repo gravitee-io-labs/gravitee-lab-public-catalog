@@ -1,0 +1,5 @@
+name: Order notifier
+description: Gets each order pushed to its callback URL, for a system that cannot poll
+settings:
+  app:
+    type: SIMPLE

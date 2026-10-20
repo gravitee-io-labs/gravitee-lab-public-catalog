@@ -1,0 +1,6 @@
+name: Partner portal
+description: A partner's application that signs in with the company's SSO and reads the orders as a Kafka client
+settings:
+  app:
+    type: SIMPLE
+    client_id: partner-portal

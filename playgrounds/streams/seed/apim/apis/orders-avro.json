@@ -1,0 +1,181 @@
+{
+  "api": {
+    "definitionVersion": "V4",
+    "type": "MESSAGE",
+    "crossId": "event-streams-orders-avro",
+    "name": "Orders Avro",
+    "apiVersion": "1.0",
+    "description": "The same orders as they sit in an Avro topic, read as JSON over HTTP and SSE. The producers keep writing Avro with their schema registry.",
+    "state": "STARTED",
+    "lifecycleState": "PUBLISHED",
+    "visibility": "PUBLIC",
+    "labels": [
+      "kafka",
+      "events"
+    ],
+    "tags": [],
+    "groups": [],
+    "listeners": [
+      {
+        "type": "HTTP",
+        "paths": [
+          {
+            "path": "/orders-avro/",
+            "overrideAccess": false
+          }
+        ],
+        "pathMappings": [],
+        "cors": {
+          "enabled": true,
+          "allowOrigin": [
+            "*"
+          ],
+          "allowMethods": [
+            "GET",
+            "POST",
+            "OPTIONS"
+          ],
+          "allowHeaders": [
+            "accept",
+            "content-type",
+            "x-gravitee-api-key",
+            "x-gravitee-client-identifier",
+            "last-event-id"
+          ],
+          "exposeHeaders": [
+            "x-gravitee-client-identifier"
+          ],
+          "allowCredentials": false,
+          "maxAge": 3600,
+          "runPolicies": false
+        },
+        "entrypoints": [
+          {
+            "type": "http-get",
+            "qos": "AUTO",
+            "configuration": {
+              "messagesLimitCount": 20,
+              "messagesLimitDurationMs": 5000,
+              "headersInPayload": false,
+              "metadataInPayload": false,
+              "statusOverride": 200
+            }
+          },
+          {
+            "type": "sse",
+            "qos": "AUTO",
+            "configuration": {
+              "heartbeatIntervalInMs": 5000,
+              "metadataAsComment": false,
+              "headersAsComment": false
+            }
+          }
+        ]
+      }
+    ],
+    "endpointGroups": [
+      {
+        "name": "Kafka",
+        "type": "kafka",
+        "loadBalancer": {
+          "type": "ROUND_ROBIN"
+        },
+        "sharedConfiguration": "{\"consumer\": {\"enabled\": true, \"topics\": [\"acme.orders.avro.v1\"], \"autoOffsetReset\": \"earliest\", \"encodeMessageId\": true, \"removeConfluentHeaders\": false}, \"security\": {\"protocol\": \"PLAINTEXT\"}}",
+        "endpoints": [
+          {
+            "name": "broker",
+            "type": "kafka",
+            "weight": 1,
+            "inheritConfiguration": true,
+            "configuration": {
+              "bootstrapServers": "${STREAMS_BROKER_BOOTSTRAP}"
+            },
+            "services": {},
+            "secondary": false,
+            "tenants": []
+          }
+        ],
+        "services": {}
+      }
+    ],
+    "flowExecution": {
+      "mode": "DEFAULT",
+      "matchRequired": false
+    },
+    "flows": [
+      {
+        "name": "Read Avro as JSON",
+        "enabled": true,
+        "selectors": [
+          {
+            "type": "CHANNEL",
+            "operations": [
+              "SUBSCRIBE"
+            ],
+            "channel": "/",
+            "channelOperator": "STARTS_WITH"
+          }
+        ],
+        "request": [],
+        "response": [],
+        "publish": [],
+        "subscribe": [
+          {
+            "name": "Avro to JSON",
+            "description": "Reads the schema id in each record, fetches the schema from the registry and writes JSON",
+            "enabled": false,
+            "policy": "avro-json",
+            "configuration": {
+              "conversion": "avro-to-json",
+              "serializationFormat": "confluent",
+              "schemaLocation": "schema-registry",
+              "resourceName": "schema-registry",
+              "enableValueTransformation": true,
+              "jsonEncoding": "UNWRAPPED",
+              "unknownFields": "LENIENT",
+              "onError": "SKIP"
+            }
+          }
+        ],
+        "tags": []
+      }
+    ],
+    "analytics": {
+      "enabled": true
+    },
+    "resources": [
+      {
+        "name": "schema-registry",
+        "type": "confluent-schema-registry",
+        "enabled": true,
+        "configuration": {
+          "url": "${STREAMS_REGISTRY_URL}"
+        }
+      }
+    ]
+  },
+  "plans": [
+    {
+      "definitionVersion": "V4",
+      "type": "API",
+      "status": "PUBLISHED",
+      "validation": "AUTO",
+      "tags": [],
+      "characteristics": [],
+      "excludedGroups": [],
+      "commentRequired": false,
+      "name": "API key",
+      "description": "Read the orders with an API key",
+      "mode": "STANDARD",
+      "order": 1,
+      "security": {
+        "type": "API_KEY",
+        "configuration": {
+          "source": "HEADER",
+          "propagateApiKey": false
+        }
+      },
+      "flows": []
+    }
+  ]
+}
