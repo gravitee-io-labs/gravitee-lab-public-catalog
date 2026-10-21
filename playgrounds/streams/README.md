@@ -9,7 +9,7 @@ The guide has twelve lessons and takes about 70 minutes. Each one opens with the
 
 ## Needs
 
-- API Management **4.13.0-alpha.6 or later**, a pre-release: the first with Gamma's Message APIs, Observability and Explorer. It needs the **Native Kafka** and **Event-native** license packs, and the Lab UI says when the license lacks a feature.
+- API Management **4.13.0-alpha.6 or later**, a pre-release whose Gamma has the Message APIs, Observability and Explorer of Event Stream Management (4.12 has none of them). It needs the **Native Kafka** and **Event-native** license packs, and the Lab UI says when the license lacks a feature.
 - The plugin `gravitee-resource-storage-azure-blob`, which Start installs. The Kafka Offloading policy stores records in Azure Blob Storage only, so the **Azurite** add-on stands in for it.
 - The add-ons **Kafka**, **Azurite** and **Schema Registry**, which Start turns on. Access Management comes with the platform and is the identity provider of the partner SSO.
 - Enough memory for the platform, a broker and a few small apps.

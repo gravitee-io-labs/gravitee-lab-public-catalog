@@ -19,7 +19,7 @@ x-gravitee:
   first_start: 6 min
   requires:
     images:
-      APIM_VERSION: "4.13.0-alpha.6"   # the first with the Message APIs, the dashboards, the logs and the Explorer of Gamma's Event Stream Management
+      APIM_VERSION: "4.13.0-alpha.6"   # Gamma's Event Stream Management with the Message APIs, the dashboards, the logs and the Explorer; 4.12 has none of them
     plugins:
       apim: [gravitee-resource-storage-azure-blob]
     license:
