@@ -166,7 +166,13 @@
                   "namePattern": "x-trace",
                   "action": "FORBID"
                 }
-              ]
+              ],
+              "batchSizeEnabled": false,
+              "batchSize": {
+                "operator": "GT",
+                "threshold": 1048576,
+                "action": "LOG"
+              }
             }
           },
           {

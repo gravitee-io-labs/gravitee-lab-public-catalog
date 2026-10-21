@@ -89,7 +89,10 @@
             "qos": "AUTO",
             "configuration": {
               "interruptConsumptionOnServerError": false,
-              "interruptConsumptionOnException": false
+              "interruptConsumptionOnException": false,
+              "logging": {
+                "enabled": true
+              }
             }
           }
         ]

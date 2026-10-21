@@ -442,32 +442,52 @@ function openUrl(url) {
   else window.open(url, "_blank", "noopener");
 }
 
+// A page of Gravitee Gamma's Event Stream Management. Its dashboards and logs take their filter in the address, as Gamma's own links write it:
+// the API, and for the refused connections their status, over the last hour
 function consoleUrl(kind) {
   const l = state.links;
   if (!l) return null;
-  const api = (name, page) => (l.apis[name] ? `${l.console}/#!/default/apis/${l.apis[name]}/${page}` : null);
+  const esm = `${l.gamma}/environments/default/esm`;
+  const of = (kindOfApi, name, page) => (l.apis[name] ? `${esm}/${kindOfApi}/${l.apis[name]}/${page}` : null);
+  const message = (name, page) => of("message-apis", name, page);
+  const kafka = (name, page) => of("kafka-apis", name, page);
+  // What Observability shows: the API, more conditions if any, over the last hour (its q is that, as base64 JSON)
+  const filter = (name, more) => btoa(JSON.stringify({ c: [{ field: "API", label: "API", operator: "in", value: [l.apis[name]] }, ...more],
+    t: { type: "relative", period: "1h" } })).replace(/=+$/, "");
+  const observe = (page, name, more = []) => (l.apis[name] ? `${esm}/observe/${page}?q=${filter(name, more)}&v=1` : null);
+  const refused = [{ field: "NATIVE_CONNECTION_STATUS", operator: "eq", value: ["CONNECTION_ERROR"] }];
+  const explorer = (page) => (l.explorer ? `${esm}/kafka-explorer/${l.explorer}/${page}` : null);
   return {
-    "kafka-traffic": api("Orders Kafka", "v4/analytics?period=1h"),
-    "kafka-logs": api("Orders Kafka", "v4/runtime-logs-native"),
-    "kafka-policies": api("Orders Kafka", "v4/policy-studio/0/0"),
-    "partners-plan": api("Partners Kafka", "plans"),
-    "partners-policies": api("Partners Kafka", "v4/policy-studio/0/0"),
-    "kafka-entrypoints": api("Orders Kafka", "v4/entrypoints"),
-    "kafka-endpoints": api("Orders Kafka", "v4/endpoints"),
-    "kafka-plans": api("Orders Kafka", "plans"),
-    "events-entrypoints": api("Orders Events", "v4/entrypoints"),
-    "events-endpoints": api("Orders Events", "v4/endpoints"),
-    "events-policies": api("Orders Events", "v4/policy-studio/0/0"),
-    "events-plans": api("Orders Events", "plans"),
-    "avro-policies": api("Orders Avro", "v4/policy-studio/0/0"),
-    explorer: l.cluster ? `${l.console}/#!/default/clusters/kafka-standalone/${l.cluster}/explorer/topics` : null,
-    applications: `${l.console}/#!/default/applications`,
+    "events-entrypoints": message("Orders Events", "entrypoints"),
+    "events-endpoints": message("Orders Events", "endpoints"),
+    "events-plans": message("Orders Events", "plans"),
+    "events-policies": message("Orders Events", "policy-studio"),
+    "events-webhooks": message("Orders Events", "webhooks"),
+    "events-logs": observe("logs", "Orders Events"),
+    "events-traffic": observe("dashboards/message-api-traffic", "Orders Events"),
+    "avro-policies": message("Orders Avro", "policy-studio"),
+    "avro-resources": message("Orders Avro", "resources"),
+    "kafka-plans": kafka("Orders Kafka", "plans"),
+    "kafka-subscriptions": kafka("Orders Kafka", "consumers/subscriptions"),
+    "kafka-policies": kafka("Orders Kafka", "policy-studio"),
+    "kafka-resources": kafka("Orders Kafka", "resources"),
+    "kafka-traffic": observe("dashboards/kafka-service-traffic", "Orders Kafka"),
+    "kafka-health": observe("dashboards/kafka-service-health", "Orders Kafka"),
+    "kafka-logs": observe("logs", "Orders Kafka"),
+    "kafka-refused": observe("logs", "Orders Kafka", refused),
+    "partners-plan": kafka("Partners Kafka", "plans"),
+    "partners-policies": kafka("Partners Kafka", "policy-studio"),
+    "partners-logs": observe("logs", "Partners Kafka"),
+    "kafka-services": `${esm}/kafka-apis`,
+    explorer: explorer("topics"),
+    "explorer-orders": explorer("topics/acme.orders.v1/messages"),
+    "explorer-groups": explorer("consumer-groups"),
     portal: `${PORTAL}catalog`,
   }[kind];
 }
 
-const CONSOLE_LINKS = [["kafka-traffic", "Orders Kafka · API Traffic"], ["kafka-logs", "Orders Kafka · Connection logs"], ["kafka-policies", "Orders Kafka · Policies"],
-  ["explorer", "Kafka Explorer"], ["events-plans", "Orders Events · Plans"], ["applications", "Applications"], ["portal", "Developer Portal · Catalog"]];
+const CONSOLE_LINKS = [["kafka-traffic", "Orders Kafka · Traffic"], ["kafka-logs", "Orders Kafka · Logs"], ["kafka-policies", "Orders Kafka · Policies"],
+  ["explorer", "Explorer · Lab broker"], ["events-logs", "Orders Events · Logs"], ["events-plans", "Orders Events · Plans"], ["portal", "Developer Portal · Catalog"]];
 
 function renderConsoleLinks() {
   $("console-links").replaceChildren(...CONSOLE_LINKS.map(([kind, label]) => {
@@ -573,8 +593,6 @@ const ACTIONS = {
   "open-partners-plan": () => openConsole("partners-plan"),
   "open-portal": () => openConsole("portal"),
   "open-partners-policies": () => openConsole("partners-policies"),
-  "open-kafka-entrypoints": () => openConsole("kafka-entrypoints"),
-  "open-kafka-endpoints": () => openConsole("kafka-endpoints"),
   "open-kafka-plans": () => openConsole("kafka-plans"),
   "open-events-entrypoints": () => openConsole("events-entrypoints"),
   "open-events-endpoints": () => openConsole("events-endpoints"),
@@ -582,14 +600,25 @@ const ACTIONS = {
   "open-events-plans": () => openConsole("events-plans"),
   "open-avro-policies": () => openConsole("avro-policies"),
   "open-explorer": () => openConsole("explorer"),
-  "open-applications": () => openConsole("applications"),
+  "open-explorer-orders": () => openConsole("explorer-orders"),
+  "open-explorer-groups": () => openConsole("explorer-groups"),
+  "open-kafka-services": () => openConsole("kafka-services"),
+  "open-kafka-subscriptions": () => openConsole("kafka-subscriptions"),
+  "open-kafka-resources": () => openConsole("kafka-resources"),
+  "open-kafka-health": () => openConsole("kafka-health"),
+  "open-kafka-refused": () => openConsole("kafka-refused"),
+  "open-partners-logs": () => openConsole("partners-logs"),
+  "open-events-webhooks": () => openConsole("events-webhooks"),
+  "open-events-logs": () => openConsole("events-logs"),
+  "open-events-traffic": () => openConsole("events-traffic"),
+  "open-avro-resources": () => openConsole("avro-resources"),
 };
 
 async function openConsole(kind) {
   if (!consoleUrl(kind)) await loadLinks();
   const url = consoleUrl(kind);
   if (url) openUrl(url);
-  else note("The Console has no such page yet: the seed has not finished", true);
+  else note("Gamma has no such page yet: the seed has not finished", true);
 }
 
 async function burst() {

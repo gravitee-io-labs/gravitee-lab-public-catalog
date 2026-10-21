@@ -13,13 +13,13 @@ x-gravitee:
   kind: playground
   name: Event Streams Management with Kafka
   category: Event
-  description: Kafka orders stream exposed by Gravitee over HTTP, SSE and webhooks and as a native Kafka API with mTLS, SSO, governance, observability and payload protection
-  tags: [Kafka, Native Kafka, mTLS, SNI, SSO, SSE, Webhook, Avro, Governance, Encryption, Offloading]
+  description: Kafka orders stream exposed by Gravitee over HTTP, SSE and webhooks and as a native Kafka API with mTLS, SSO, governance, observability and payload protection, run from Gravitee Gamma
+  tags: [Kafka, Native Kafka, Gamma, mTLS, SNI, SSO, SSE, Webhook, Avro, Governance, Observability, Encryption, Offloading]
   duration: 70 min
   first_start: 6 min
   requires:
     images:
-      APIM_VERSION: "4.12.20"
+      APIM_VERSION: "4.13.0-alpha.6"   # the first with the Message APIs, the dashboards, the logs and the Explorer of Gamma's Event Stream Management
     plugins:
       apim: [gravitee-resource-storage-azure-blob]
     license:
@@ -32,18 +32,18 @@ x-gravitee:
       apim-native-kafka-policy-quota: Lesson 10
       apim-native-kafka-policy-encryption: Lesson 12
       apim-native-kafka-policy-offloading: Lesson 12
+      apim-native-kafka-explorer: Lessons 2, 7, 11 and 12
+      gamma-esm-module: Lessons 1 to 12
   tested:
-    - APIM_VERSION: "4.12.20"
-      APIM_REGISTRY: graviteeio
-    - APIM_VERSION: "4.12.23"
+    - APIM_VERSION: "4.13.0-alpha.6"
       APIM_REGISTRY: graviteeio
   consoles:
     - streams-app
-    - apim-management-ui
+    - gamma-ui
     - apim-portal-ui
   terminal: streams-tools   # its shell, under the UIs: where the guide's commands run
   accounts:
-    - for: APIM Console and Developer Portal, the platform team
+    - for: Gravitee Gamma and the Developer Portal, the platform team
       username: admin
       password: *apim-password
     - for: Order dashboard application, the API key of the Orders Events API
@@ -141,7 +141,7 @@ services:
       STREAMS_PARTNER_FR_KEY: *partner-fr-key
       STREAMS_PARTNER_DE_KEY: *partner-de-key
       STREAMS_REGISTRY_URL: http://schema-registry:8081   # The schema registry of the Avro orders
-      STREAMS_CONSOLE_URL: http://localhost:8084   # The APIM Console, as the page links to it
+      STREAMS_GAMMA_URL: http://localhost:8086   # Gravitee Gamma, as the page links to it
       STREAMS_BROKER: kafka:9091   # The broker itself, plaintext, to show what is really stored
       STREAMS_BROKER_TOPIC: acme.orders.v1   # The topic of the orders on the broker
       STREAMS_MANAGEMENT_URL: http://apim-management-api:8083   # Where the policy switches change the APIs
@@ -210,6 +210,7 @@ services:
       - data-streams-certs:/certs:ro
       - ./init/seed.sh:/seed.sh:ro
       - ./init/portal.py:/portal.py:ro
+      - ./init/explorer.py:/explorer.py:ro
       - ./init/overview-events.md:/overview-events.md:ro
       - ./init/overview-avro.md:/overview-avro.md:ro
     environment:

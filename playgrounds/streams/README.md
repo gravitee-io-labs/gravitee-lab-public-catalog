@@ -3,13 +3,13 @@
 A Kafka topic of orders, put in front of its consumers by Gravitee two ways.
 
 - **Protocol mediation** turns the topic into an HTTP POST, a GET, an SSE stream and a webhook that people subscribe to in the Developer Portal. It shapes the stream with message filtering and JSON to JSON, gives each partner its own view of one topic, and reads an Avro topic as JSON.
-- **Native Kafka** lets plain Kafka clients connect through the gateway: routed by host name (SNI), identified by a certificate (mTLS) or a token (SSO), governed by rules on topics, producers and quotas, and watched in the Console. The payload is encrypted and large records are offloaded to an object store.
+- **Native Kafka** lets plain Kafka clients connect through the gateway: routed by host name (SNI), identified by a certificate (mTLS) or a token (SSO), governed by rules on topics, producers and quotas, and watched in the dashboards and logs of Gravitee Gamma. The payload is encrypted and large records are offloaded to an object store.
 
-The guide has twelve lessons and takes about 70 minutes. Each one opens with the situation, then what Gravitee does about it, then buttons to try it.
+The guide has twelve lessons and takes about 70 minutes. Each one opens with the situation, then what Gravitee does about it, then buttons to try it and to see it in **Gravitee Gamma**: the APIs and their policies, the logs, the dashboards and the Explorer of the broker.
 
 ## Needs
 
-- API Management **4.12.14 or later**, with the **Native Kafka** and **Event-native** license packs. The Lab UI says when the license lacks a feature.
+- API Management **4.13.0-alpha.6 or later**, a pre-release: the first with Gamma's Message APIs, Observability and Explorer. It needs the **Native Kafka** and **Event-native** license packs, and the Lab UI says when the license lacks a feature.
 - The plugin `gravitee-resource-storage-azure-blob`, which Start installs. The Kafka Offloading policy stores records in Azure Blob Storage only, so the **Azurite** add-on stands in for it.
 - The add-ons **Kafka**, **Azurite** and **Schema Registry**, which Start turns on. Access Management comes with the platform and is the identity provider of the partner SSO.
 - Enough memory for the platform, a broker and a few small apps.
@@ -36,14 +36,13 @@ The policies of the lessons are on the APIs from the start, switched off. The **
 |---|---|
 | Demo App, the demo application | http://localhost:8170 |
 | Developer Portal (next generation) | http://localhost:8085/next/ |
-| APIM Console | http://localhost:8084 |
+| Gravitee Gamma | http://localhost:8086 |
 | AM Console | http://localhost:8081 |
-| Kafka UI | http://localhost:8088 |
 | Schema Registry | http://localhost:8097 |
 | Gateway, HTTP | http://localhost:8082 |
 | Gateway, Kafka | `orders.kafka.local:9092`, `payments.kafka.local:9092`, `partners.kafka.local:9092` |
 
-Sign in to the consoles and the Developer Portal as `admin`; the **Details** tab of the playground lists the passwords, the API keys and the client secret of the lessons.
+Sign in to Gamma, the AM Console and the Developer Portal as `admin`; the **Details** tab of the playground lists the passwords, the API keys and the client secret of the lessons.
 
 ## Use a Kafka client from your machine
 
@@ -86,11 +85,12 @@ kcat -b orders.kafka.local:9092 -C -t orders -o beginning -e \
 
 - The gateway gets `kafka.ssl.clientAuth=request`: it asks every Kafka client for a certificate but does not require one. The **mTLS** plans refuse a client without a registered certificate, and the **SSO token** plan accepts a client with none. It applies to **every** native Kafka API on the gateway while this playground is on.
 - The orders APIs are added to the catalog of the next-generation Developer Portal (a menu *Event streams*, with an Overview page for each API), which the seed cannot do through the Automation API on 4.12.
-- The seed adds a cluster named *Lab broker* to the Console, for the Kafka Explorer of lesson 11.
+- The seed adds a connection named *Lab broker* to Gamma's Explorer, which reads the broker directly, for lessons 2, 7, 11 and 12.
+- The webhook entrypoint of Orders Events records each delivery, which Gamma lists under **Webhooks**.
 
 ## What stays after removal
 
-The certificates live in the Docker volume `data-streams-certs`, the blobs in `data-azurite` and the topics and schemas in `data-kafka`. Stopping keeps them, and `make reset` deletes them. *Delete what it created* in the Lab UI removes the APIs, the applications, the Access Management domain, the portal menu and the cluster.
+The certificates live in the Docker volume `data-streams-certs`, the blobs in `data-azurite` and the topics and schemas in `data-kafka`. Stopping keeps them, and `make reset` deletes them. *Delete what it created* in the Lab UI removes the APIs, the applications, the Access Management domain, the portal menu and the Explorer connection.
 
 ## Share it
 

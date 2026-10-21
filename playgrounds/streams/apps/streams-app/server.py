@@ -136,7 +136,7 @@ def relay_sse(settings: Settings, who: str = "dashboard", api: str = "orders") -
                 text = line.decode("utf-8", errors="replace").rstrip("\r\n")
                 if text.startswith("data:"):
                     put(message_event(text[5:].lstrip(), "sse"))
-        except OSError as error:
+        except (OSError, AttributeError) as error:    # closing the connection under a read leaves http.client without its file
             if not stop.is_set():
                 put({"type": "error", "message": f"SSE stream ended: {error}"})
 
