@@ -40,6 +40,7 @@ x-gravitee:
   consoles:
     - streams-app
     - apim-management-ui
+    - apim-portal-ui
   terminal: streams-tools   # its shell, under the UIs: where the guide's commands run
   accounts:
     - for: APIM Console and Developer Portal, the platform team

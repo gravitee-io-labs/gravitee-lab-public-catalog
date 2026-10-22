@@ -472,8 +472,7 @@ const CONSOLE_LINKS = [["kafka-traffic", "Orders Kafka · API Traffic"], ["kafka
 function renderConsoleLinks() {
   $("console-links").replaceChildren(...CONSOLE_LINKS.map(([kind, label]) => {
     const url = consoleUrl(kind);
-    // The portal has no tab of the Lab UI: it opens in the browser, from this click, which a message to the Lab UI could not give
-    return h("li", { onclick: () => url && (kind === "portal" ? window.open(url, "_blank", "noopener") : openUrl(url)), class: url ? "" : "off" }, h("span", { class: "name" }, label), h("span", { class: "chip" }, "Open"));
+    return h("li", { onclick: () => url && openUrl(url), class: url ? "" : "off" }, h("span", { class: "name" }, label), h("span", { class: "chip" }, "Open"));
   }));
 }
 
@@ -572,6 +571,7 @@ const ACTIONS = {
   "open-kafka-logs": () => openConsole("kafka-logs"),
   "open-kafka-policies": () => openConsole("kafka-policies"),
   "open-partners-plan": () => openConsole("partners-plan"),
+  "open-portal": () => openConsole("portal"),
   "open-partners-policies": () => openConsole("partners-policies"),
   "open-kafka-entrypoints": () => openConsole("kafka-entrypoints"),
   "open-kafka-endpoints": () => openConsole("kafka-endpoints"),

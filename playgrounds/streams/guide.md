@@ -142,7 +142,7 @@ sequenceDiagram
 
 ### Try it
 
-1. [Open the portal catalog](http://localhost:8085/next/catalog) in your browser, and sign in as `admin` if asked. The password is in the **Details** tab.
+1. [Open the portal catalog](action:open-portal), and sign in as `admin` if asked. The password is in the **Details** tab.
 2. Open **Orders Events** and select **Subscribe**, at the top right. The wizard has four steps:
    - **Choose a plan**: the plan **Webhook**, then **Next**.
    - **Choose an application**: **Order notifier**, then **Next**.
