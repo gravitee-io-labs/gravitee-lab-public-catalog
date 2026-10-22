@@ -1,9 +1,8 @@
-"""What the seeder cannot do on API Management 4.12, done through the Console's own API.
+"""What the seeder cannot do here, done through the management API's portal routes.
 
-- The next-generation developer portal lists the APIs that a navigation item of type API names, in a menu. The seeder fills a whole
-  portal (theme, pages, listings) through the Automation API, which 4.12 does not serve yet, so this script puts the two HTTP APIs in a
-  menu, with an Overview page each.
-- The Kafka Explorer of the Console reads a registered cluster: the lab's broker is registered.
+The next-generation developer portal lists the APIs that a navigation item of type API names, in a menu. The seeder fills a whole portal
+(theme, pages, listings) through the Automation API, which this version does not serve, so this script puts the two HTTP APIs in a menu,
+with an Overview page each.
 
 It changes nothing that is already there. seed.sh runs it after the seed, and with --remove before the seed's own removal.
 """
@@ -20,7 +19,6 @@ ROOT = os.environ["APIM_MANAGEMENT_URL"].rstrip("/") + "/management/v2"
 BASE = ROOT + "/organizations/DEFAULT/environments/DEFAULT"
 AUTH = "Basic " + base64.b64encode(f"{os.environ['APIM_USERNAME']}:{os.environ['APIM_PASSWORD']}".encode()).decode()
 FOLDER = "Event streams"
-CLUSTER = "Lab broker"
 # The crossId of each API of the menu, and the text of its Overview page
 APIS = {"event-streams-orders-events": "/overview-events.md", "event-streams-orders-avro": "/overview-avro.md"}
 
@@ -49,20 +47,12 @@ def publish(item, **changes):
     return call("PUT", f"/portal-navigation-items/{item['id']}", body)
 
 
-def clusters():
-    return call("GET", "/clusters", base=ROOT + "/environments/DEFAULT").get("data", [])
-
-
 def remove():
-    """The menu goes with the API items in it, and the registered cluster with it. The APIs are deleted by the seed's own removal."""
+    """The menu goes with the API items in it. The APIs are deleted by the seed's own removal."""
     folder = next((i for i in navigation() if i.get("type") == "FOLDER" and i.get("title") == FOLDER), None)
     if folder:
         call("DELETE", f"/portal-navigation-items/{folder['id']}")
         print(f"[portal] ✓ Menu {FOLDER} removed")
-    found = next((c for c in clusters() if c.get("name") == CLUSTER), None)
-    if found:
-        call("DELETE", f"/clusters/{found['id']}", base=ROOT + "/environments/DEFAULT")
-        print(f"[portal] ✓ Cluster {CLUSTER} removed")
 
 
 def menu(apis):
@@ -102,20 +92,11 @@ def menu(apis):
                 print(f"[portal] ✓ Overview of {api['name']} published")
 
 
-def cluster():
-    if not any(c.get("name") == CLUSTER for c in clusters()):
-        call("POST", "/clusters", {"type": "KAFKA_CLUSTER_STANDALONE", "name": CLUSTER, "description": "The broker of the lab, which the Explorer reads",
-                                   "configuration": {"bootstrapServers": os.environ["STREAMS_BROKER_BOOTSTRAP"], "security": {"protocol": "PLAINTEXT"}}},
-             base=ROOT + "/environments/DEFAULT")
-        print(f"[portal] ✓ Cluster {CLUSTER} registered")
-
-
 def main():
     if "--remove" in sys.argv[1:]:
         return remove()
     found = call("GET", "/apis?perPage=100")
     menu({a["crossId"]: a for a in found.get("data", []) if a.get("crossId")})
-    cluster()
 
 
 if __name__ == "__main__":

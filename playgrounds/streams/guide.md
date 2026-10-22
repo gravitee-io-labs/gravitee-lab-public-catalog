@@ -41,6 +41,7 @@ The scenario is a shop's **orders** topic, with fictional data. It takes about 7
 ### How this guide works
 
 - **Buttons run in the demo app.** [Send an order](action:send-order) does what its label says in the **Demo App** tab. No need to switch tabs.
+- **Eye buttons open Gravitee Gamma**, the console of the platform, on the page that shows how a lesson is built or what it left in the logs and dashboards. Sign in as `admin` if asked: the password is in the **Details** tab.
 - **The Broker column is the truth.** It reads the topic with no gateway in between, so you see what Kafka really stores.
 - **Commands run in the terminal** under the tabs. Press **Run** on a block.
 - **Policies stay on** until you press [Reset](action:reset). Lessons that need a clean start begin with it.
@@ -73,7 +74,9 @@ The same call from a terminal, as the checkout would make it:
 order 1001 249 | curl -s -i -X POST -H "X-Gravitee-Api-Key: $ORDERS_KEY" -H "Content-Type: application/json" -d @- "$GATEWAY/orders/" | head -1
 ```
 
-**You saw.** One `POST`, and the order is in Kafka. The caller never knew what a topic is.
+[Open the logs of Orders Events](action:open-events-logs) and choose the **Message** view: each call has its entrypoint, `http-post`, its status, `202`, and the application that made it.
+
+**You saw.** One `POST`, and the order is in Kafka. The caller never knew what a topic is, and every call is in the logs with its caller.
 
 **Next:** reading the orders back, with no consumer group to manage.
 
@@ -106,6 +109,8 @@ curl -s -H "X-Gravitee-Api-Key: $ORDERS_KEY" -H "Accept: application/json" "$GAT
 ```bash run
 curl -sN --max-time 15 -H "X-Gravitee-Api-Key: $ORDERS_KEY" -H "Accept: text/event-stream" "$GATEWAY/orders/"
 ```
+
+Kafka's side of it: [open the consumer groups of the broker](action:open-explorer-groups) in the Explorer. The group of each HTTP reader is named after its subscription, and its lag is what that reader has not read yet.
 
 **You saw.** Same address, same key. The `Accept` header chose the protocol, and Kafka saw an ordinary consumer both times.
 
@@ -150,9 +155,11 @@ sequenceDiagram
    - **Review**: select **Subscribe**.
 3. [Connect the webhook consumer](action:consumer-webhook), then [send an order](action:send-order).
 
-The order lands in the **Consumer** column about a second later.
+The order lands in the **Consumer** column about a second later. [See the deliveries](action:open-events-webhooks): each call to the callback URL, with the status it got.
 
-**You saw.** The subscription belongs to the partner, and so does the callback URL. Gravitee owns the delivery.
+One API now serves four protocols. [The traffic dashboard of Orders Events](action:open-events-traffic) ranks them under **Top connectors**: the Kafka endpoint on one side, `http-post`, `sse` and `webhook` on the other.
+
+**You saw.** The subscription belongs to the partner, and so does the callback URL. Gravitee owns the delivery and records each one.
 
 **Next:** not every reader should get the whole order.
 
@@ -168,7 +175,7 @@ The order lands in the **Consumer** column about a second later.
 - Both act on the way out. The topic is never modified.
 
 **How it is built.**
-- Two steps in the **subscribe** phase of Orders Events, the phase that runs for each message sent to a reader: **Only high-value orders** (policy *Message filtering*, which keeps orders of **500 or more**) and **Notification payload** (policy *JSON to JSON*). [Open the policies](action:open-events-policies).
+- The flow **Shape the stream** of Orders Events holds two steps in its **subscribe** phase, the phase that runs for each message sent to a reader: **Message Filtering**, which keeps orders of **500 or more**, and **JSON to JSON Transformation**. [Open the Policy Studio](action:open-events-policies), select the flow, then the tab **Event Messages**. Both are marked **OFF** until you switch them on.
 
 What Kafka stores, and what a reader receives:
 
@@ -188,7 +195,7 @@ What Kafka stores, and what a reader receives:
 3. [Send an order of 30](action:send-low-value). It never arrives.
 4. [Send an order of 1500](action:send-high-value). It arrives as a notification, without the card.
 
-The **Broker** column still holds the whole order.
+The **Broker** column still holds the whole order. In the Policy Studio, reload the page: the **OFF** marks are gone.
 
 **You saw.** Two policies replace a filtering service, and they run in front of every reader at once.
 
@@ -206,7 +213,8 @@ The **Broker** column still holds the whole order.
 - Adding a partner is a new plan, not a new topic and not a new job.
 
 **How it is built.**
-- Three plans on Orders Events, each with its own API key. The steps **Only FR orders** and **Only DE orders** are in the **plan's** flow, so each applies to its subscribers only. [Open the plans](action:open-events-plans).
+- Three plans on Orders Events, each with its own API key. [Open the plans](action:open-events-plans).
+- The plan flows **France only** and **Germany only** each hold a **Message Filtering** step on the country, so each applies to the subscribers of its plan only. They are listed under **Plan flows** in [the Policy Studio](action:open-events-policies).
 - Each partner is an **application** with a subscription to one plan.
 
 ```mermaid
@@ -227,6 +235,8 @@ flowchart LR
 4. [Connect as Partner Germany](action:consumer-germany). It reads the topic from the start, and only the German order is there.
 5. [Connect as the dashboard](action:consumer-dashboard). All three are there.
 
+[The logs of Orders Events](action:open-events-logs) name the reader of each stream: **Partner France**, **Partner Germany**, **Order dashboard**.
+
 **You saw.** One topic, three readers, three views. The difference is the plan each reader subscribed to.
 
 **Next:** a topic that is not JSON at all.
@@ -242,7 +252,8 @@ flowchart LR
 - The producers keep writing Avro. The registry stays the single source of schemas.
 
 **How it is built.**
-- The API **Orders Avro** has a **resource** that points at the schema registry, and one step, **Avro to JSON**, in the subscribe phase. [Open the policy](action:open-avro-policies).
+- The API **Orders Avro** has a **resource**, `schema-registry`, that points at the registry. [See the resource](action:open-avro-resources).
+- Its flow **Read Avro as JSON** has one step in the subscribe phase, the policy **Avro to JSON**. [Open the Policy Studio](action:open-avro-policies).
 - The registry is the **Schema Registry** add-on. [See its subjects](http://localhost:8097/subjects).
 
 ```mermaid
@@ -278,8 +289,8 @@ flowchart LR
 - Policies, topics and plans of their own for each API.
 
 **How it is built.**
-- Three native APIs, **Orders Kafka**, **Payments Kafka** and **Partners Kafka**, each with a **host prefix** in its entrypoint: `orders`, `payments`, `partners`. [See the host of Orders Kafka](action:open-kafka-entrypoints).
-- Two steps in the **interact** phase, which covers what a client asks of the cluster. **Client topic is orders** (policy *Topic mapping*) renames the broker's `acme.orders.v1` to `orders`, and **Only its own topics** (policy *Kafka ACL*) hides every other topic.
+- Three native APIs, called **Kafka Services** in Gamma: **Orders Kafka**, **Payments Kafka** and **Partners Kafka**, each with its own host, `orders`, `payments` and `partners`, on the same port. [See the Kafka Services](action:open-kafka-services).
+- Two steps of Orders Kafka in the **interact** phase, which covers what a client asks of the cluster: **Kafka Topic Mapping** renames the broker's `acme.orders.v1` to `orders`, and **Kafka ACL** hides every other topic. They are in [the Policy Studio](action:open-kafka-policies), tab **Global**.
 
 ```mermaid
 sequenceDiagram
@@ -310,7 +321,7 @@ for host in orders.kafka.local payments.kafka.local ghost.kafka.local; do echo "
 kc -b $KAFKA_ORDERS -L | grep topic; kc -b $KAFKA_PAYMENTS -L | grep topic
 ```
 
-Each API shows one topic, its own. The broker's real topics are `acme.orders.v1` and `acme.payments.v1`.
+Each API shows one topic, its own. The broker's real topics are `acme.orders.v1` and `acme.payments.v1`: [see them in the Explorer](action:open-explorer), which reads the broker directly.
 
 **You saw.** A new API is a new host name, not a new port.
 
@@ -329,7 +340,7 @@ Each API shows one topic, its own. The broker's real topics are `acme.orders.v1`
 
 **How it is built.**
 - The plan **mTLS** on Orders Kafka. [See the plans](action:open-kafka-plans).
-- The application **Fulfillment service** holds its certificate in its settings, and its subscription to the plan is what lets it in. [Open the applications](action:open-applications).
+- The applications **Fulfillment service** and **Billing service** hold their certificates in their settings, and their subscriptions to the plan are what let them in. [See the subscriptions](action:open-kafka-subscriptions).
 
 ### Try it
 
@@ -337,7 +348,9 @@ Each API shows one topic, its own. The broker's real topics are `acme.orders.v1`
 2. [Send as a stranger](action:send-as-stranger). The certificate is valid, but no application registered it. Refused.
 3. [Send with no certificate](action:send-as-anonymous). Refused too, the plan needs one.
 
-**You saw.** Revoking a client is closing a subscription, and the broker never hears about it.
+[Open the refused connections](action:open-kafka-refused) and choose the **Kafka** view: each is a **Connection error**, with no application. Select the latest one, and the panel says why: a certificate that no subscription knows, or no certificate at all.
+
+**You saw.** Revoking a client is closing a subscription, and the broker never hears about it. Every refusal is logged with its reason.
 
 **Next:** partners who already have SSO.
 
@@ -384,6 +397,8 @@ Then:
 
 A partner whose secret is wrong never gets a token, and a client with no token is turned away by the gateway.
 
+[Open the logs of Partners Kafka](action:open-partners-logs) and choose the **Kafka** view: the partner's connections are attributed to **Partner portal**, the application its token named.
+
 **You saw.** The company's SSO decides who the partner is. The gateway only checks the token.
 
 **Next:** many teams share one cluster, so it needs rules.
@@ -400,15 +415,15 @@ A partner whose secret is wrong never gets a token, and a client with no token i
 - All of it at the gateway, with no change to clients or brokers.
 
 **How it is built.**
-- Three steps on Orders Kafka, each in the phase of the request it governs. [Open the policies](action:open-kafka-policies).
-- **Topic guardrails** (policy *Create topic rules*): a name like `orders-eu` (the prefix `orders-`, then lowercase letters, digits or dashes) and at most 3 partitions.
-- **Safe producers** (policy *Produce rules*): `acks=0` is forbidden, and the header `x-trace` is required.
-- **Byte quota** (policy *Quota*): 4 KB per second for each connection, for producers and consumers.
+- Three steps on Orders Kafka, each in the phase of the request it governs. [Open the Policy Studio](action:open-kafka-policies): the first is in the tab **Global**, the other two in **Event Messages**, all marked **OFF**.
+- **Kafka Create Topic Rules**, the topic guardrails: a name like `orders-eu` (the prefix `orders-`, then lowercase letters, digits or dashes) and at most 3 partitions.
+- **Kafka Produce Rules**, the safe producers: `acks=0` is forbidden, and the header `x-trace` is required.
+- **Kafka Quota**: 4 KB per second for each connection, for producers and consumers.
 
 ```mermaid
 flowchart LR
-  c(["Client"]) --> a["Interact<br/>Topic guardrails<br/>Only its own topics, Client topic"]
-  a --> b["Publish<br/>Safe producers<br/>Byte quota"]
+  c(["Client"]) --> a["Interact<br/>ACL, create topic rules,<br/>topic mapping"]
+  a --> b["Publish<br/>Produce rules<br/>Quota"]
   b --> k[("Kafka")]
   classDef gravitee stroke:#e8590c,stroke-width:2px
   class a,b gravitee
@@ -432,9 +447,10 @@ flowchart LR
 
 ### Where the details are
 
-The client only receives *policy violation*. The gateway's log says which rule. Open the [Logs page of the Lab UI](http://localhost:9000/#/logs) and pick the gateway.
+- **What the rules stopped.** [Open the health dashboard of Orders Kafka](action:open-kafka-health). Under **Requests: received → forwarded → answered**, the gap between the first two lines is what the gateway kept from the broker.
+- **Which rule.** The client only receives *policy violation*. The gateway's log says which rule: open the [Logs page of the Lab UI](http://localhost:9000/#/logs) and pick the gateway.
 
-The order matters too: a step that runs before **Client topic is orders** sees the name the client used, and one that runs after it sees the name on the broker.
+The order matters too: a step that runs before **Kafka Topic Mapping** sees the name the client used, and one that runs after it sees the name on the broker.
 
 **You saw.** The cluster's rules live in one place and apply to every client.
 
@@ -448,23 +464,23 @@ The order matters too: a step that runs before **Client topic is orders** sees t
 
 **What Gravitee adds.**
 - Attributes every connection and every message to an **application** and a **plan**.
-- Shows traffic, authentication failures and connection logs per API, filtered by application or plan.
-- The **Kafka Explorer** adds the cluster's own view: topics, consumer groups and lag.
+- Shows traffic, connection health and logs per API, filtered by application or plan.
+- The **Explorer** adds the cluster's own view: topics, messages, consumer groups and lag.
 
 **How it is built.**
 - Nothing to configure. Analytics and logs are on for every API, and the attribution comes from the subscriptions of lesson 8.
-- Pages of Orders Kafka: **API Traffic**, **Logs**, and the Kafka Explorer of the cluster the seed registered.
+- In Gamma, **Observability** holds the dashboards and the logs of every API; the **Explorer** reads the broker through the connection **Lab broker**, which the seed made.
 
 ### Try it
 
 1. [Reset the demo](action:reset). The rules of lesson 10 would refuse these orders.
 2. [Send as the fulfillment service](action:send-as-fulfillment) twice, and [as the billing service](action:send-as-billing) twice.
 3. [Send as a stranger](action:send-as-stranger), to leave a failure in the logs.
-4. [Open the API Traffic of Orders Kafka](action:open-kafka-traffic). Filter on **Application**: the counts follow the clients.
-5. [Open the connection logs](action:open-kafka-logs). One line per connection, with its application and plan. The failure has neither, because nobody could be identified.
-6. [Open the Kafka Explorer](action:open-explorer). Topics, consumer groups and their lag, straight from the cluster.
+4. [Open the traffic dashboard of Orders Kafka](action:open-kafka-traffic). **Applications — producing** ranks the two services by what they sent, and **Topics — produced** shows the topic under the name the clients use, `orders`.
+5. [Open the logs of Orders Kafka](action:open-kafka-logs) and choose the **Kafka** view. One line per connection, with its status, its application and its client id. The stranger's line is a **Connection error** with no application, because nobody could be identified.
+6. [Open the consumer groups in the Explorer](action:open-explorer-groups). Each group, its members and its lag, straight from the cluster.
 
-**You saw.** The gateway turns anonymous traffic into traffic you can attribute, and refused connections are visible too.
+**You saw.** The gateway turns anonymous traffic into traffic you can attribute, and refused connections are visible too. The time range and the filters are in the address of each page, so a view can be shared as a link.
 
 **Next:** the data itself.
 
@@ -480,8 +496,8 @@ The order matters too: a step that runs before **Client topic is orders** sees t
 - **Message filtering** on the Kafka side too, so a consumer gets only the large orders.
 
 **How it is built.**
-- Policies of Orders Kafka, on the way in (**publish**) and on the way out (**subscribe**): **Encrypt card and email** and **Decrypt card and email**, **Offload large orders** and **Fetch offloaded orders**, and **Only high-value orders** on the way out. [Open the policies](action:open-kafka-policies).
-- The key is a setting of the playground. The object store is **Azurite**, the Azure Blob emulator, because Offloading supports Azure Blob.
+- Steps of Orders Kafka on the way in (**publish**) and on the way out (**subscribe**): **Kafka Message Encryption & Decryption** and **Kafka Offloading** both ways, and **Kafka Message Filtering** on the way out. [Open the Policy Studio](action:open-kafka-policies), tab **Event Messages**.
+- The key is a setting of the playground. The object store is **Azurite**, the Azure Blob emulator, because Offloading supports Azure Blob. The resource `offload-store` points at it. [See the resource](action:open-kafka-resources).
 
 ```mermaid
 flowchart LR
@@ -503,12 +519,12 @@ flowchart LR
 3. [Connect the Kafka consumer](action:consumer-fulfillment), then [send an order](action:send-as-fulfillment) as a Kafka client.
 4. In the **Broker** column, `email` and `card` are ciphertext, with the headers that say how. In the **Consumer** column, which reads through the gateway, they are in clear.
 
-To see what a broker administrator sees, open [Kafka UI](http://localhost:8088) and read the topic.
+To see what a broker administrator sees, [open the topic in the Explorer](action:open-explorer-orders) and select **Fetch**: the newest records, with `email` and `card` as ciphertext.
 
 **Offload.**
 1. [Switch on the offloading](action:offload-on).
 2. [Send a 120 KB order](action:send-large).
-3. The **Broker** column shows a pointer of about a hundred bytes. The **Azurite** card lists the blob. The consumer still gets the whole order.
+3. The **Broker** column shows a pointer of about a hundred bytes, and so does the Explorer after another **Fetch**: an address in the `offloaded-orders` container. The **Azurite** card lists the blob. The consumer still gets the whole order.
 
 **Filter.**
 1. [Switch on the filter for Kafka](action:kafka-filter-on).
@@ -527,7 +543,7 @@ The HTTP readers of lessons 1 to 6 get the topic as Kafka stores it, ciphertext 
 | 6 | Avro readable by Avro clients only | The registry read once, JSON for everyone |
 | 7 to 9 | One address per cluster, secrets in client configs | One port, certificates and SSO tokens as identities |
 | 10 | Rules enforced by convention and post-mortems | Rules and quotas at the gateway |
-| 11 | Client ids chosen by clients | Traffic per application and plan |
+| 11 | Client ids chosen by clients | Traffic, health and logs per application and plan |
 | 12 | Plaintext in the topic, records limited in size | Encryption at rest and offloading |
 
 ## Start again

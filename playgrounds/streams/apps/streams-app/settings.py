@@ -29,7 +29,7 @@ class Settings:
     registry_url: str         # the schema registry of the Avro orders
     avro_topic: str           # the topic of the Avro orders on the broker
     partner_keys: dict        # API keys of the HTTP partners, by name
-    console_url: str          # the APIM Console, as the page links to it
+    gamma_url: str            # Gravitee Gamma, as the page links to it
     blob_connection: str      # the Azurite account, where large messages are offloaded
     blob_container: str
     buffer: int               # webhook deliveries kept
@@ -72,7 +72,7 @@ def load(env: Mapping[str, str] = os.environ) -> Settings:
         registry_url=env.get("STREAMS_REGISTRY_URL", "http://schema-registry:8081").rstrip("/"),
         avro_topic=env.get("STREAMS_AVRO_TOPIC", "acme.orders.avro.v1"),
         partner_keys={"dashboard": env.get("STREAMS_ORDERS_KEY", ""), "france": env.get("STREAMS_PARTNER_FR_KEY", ""), "germany": env.get("STREAMS_PARTNER_DE_KEY", "")},
-        console_url=env.get("STREAMS_CONSOLE_URL", "http://localhost:8084").rstrip("/"),
+        gamma_url=env.get("STREAMS_GAMMA_URL", "http://localhost:8086").rstrip("/"),
         blob_connection=env.get("STREAMS_BLOB_CONNECTION", ""),
         blob_container=env.get("STREAMS_BLOB_CONTAINER", "offloaded-orders"),
         buffer=_number(env, "STREAMS_HOOK_BUFFER", 200, 1, 100000),

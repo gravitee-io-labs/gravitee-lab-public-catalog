@@ -8,7 +8,7 @@ from settings import load
 
 
 class FakeApi:
-    """A Management API with two APIs, answering what the switches ask."""
+    """A Management API with the APIs of the switches and Gamma's Explorer connections, answering what the app asks."""
 
     def __init__(self):
         self.apis = {
@@ -23,6 +23,7 @@ class FakeApi:
                                         "subscribe": [{"name": "Byte quota (read)", "enabled": False}, {"name": "Decrypt card and email", "enabled": False},
                                                       {"name": "Fetch offloaded orders", "enabled": False}, {"name": "Only high-value orders", "enabled": False}]}]},
         }
+        self.connections = [{"id": "c0", "name": "Another broker"}, {"id": "c1", "name": "Lab broker"}]
         self.calls = []
 
     def __call__(self, request, timeout=None):
@@ -31,6 +32,8 @@ class FakeApi:
         by_id = {a["id"]: a for a in self.apis.values()}
         if path.startswith("/apis?"):
             body = {"data": [{"id": a["id"], "name": a["name"]} for a in self.apis.values()]}
+        elif path.startswith("/modules/esm/kafka-explorer/connections?"):
+            body = {"data": self.connections}
         elif request.get_method() == "PUT":
             sent = json.loads(request.data)
             by_id[path.rsplit("/", 1)[1]].update(sent)
@@ -89,6 +92,16 @@ class SwitchesTest(unittest.TestCase):
     def test_a_missing_api_is_unavailable_not_a_crash(self):
         del self.api.apis["Orders Events"]
         self.assertIsNone(self.management.states()["http-filter"])
+
+    def test_the_links_name_gamma_the_apis_and_the_explorer_connection(self):
+        links = self.management.links(load({}))
+        self.assertEqual(links["gamma"], "http://localhost:8086")
+        self.assertEqual(links["apis"], {"Orders Events": "a1", "Orders Avro": "v1", "Orders Kafka": "k1"})
+        self.assertEqual(links["explorer"], "c1")
+
+    def test_the_links_have_no_explorer_before_the_seed_made_it(self):
+        self.api.connections = []
+        self.assertIsNone(self.management.links(load({}))["explorer"])
 
 
 if __name__ == "__main__":

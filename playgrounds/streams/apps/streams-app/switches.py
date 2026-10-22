@@ -43,6 +43,11 @@ class Unavailable(Exception):
     pass
 
 
+# The Explorer of Gamma's Event Stream Management, and the connection to the lab's broker that the seed makes in it
+EXPLORER = "/gamma/organizations/DEFAULT/environments/DEFAULT/modules/esm/kafka-explorer/connections"
+EXPLORER_CONNECTION = "Lab broker"
+
+
 class Management:
     def __init__(self, settings: Settings, opener: Callable = urllib.request.urlopen) -> None:
         self.base = settings.management_url + PATH
@@ -110,19 +115,19 @@ class Management:
                 self.wait_deployed(identifier)
 
     def links(self, settings: Settings) -> dict:
-        """What the page links to in the Console: the ids of the APIs and of the registered cluster."""
-        found: dict = {"console": settings.console_url, "apis": {}, "cluster": None}
-        for name in ("Orders Events", "Orders Avro", "Orders Kafka", "Partners Kafka"):
+        """What the page links to in Gravitee Gamma: the ids of the APIs and of the Explorer's connection to the broker."""
+        found: dict = {"gamma": settings.gamma_url, "apis": {}, "explorer": None}
+        for name in ("Orders Events", "Orders Avro", "Orders Kafka", "Partners Kafka", "Payments Kafka"):
             try:
                 found["apis"][name] = self.api_id(name)
             except Unavailable:
                 pass
         try:
-            base = settings.management_url + "/management/v2/environments/DEFAULT/clusters"
+            base = settings.management_url + EXPLORER + "?page=1&perPage=50"
             request = urllib.request.Request(base, headers={"Authorization": self.auth})
             with self.open(request, timeout=10) as answer:
-                clusters = json.loads(answer.read()).get("data", [])
-            found["cluster"] = next((c["id"] for c in clusters if c.get("name") == "Lab broker"), None)
+                connections = json.loads(answer.read()).get("data", [])
+            found["explorer"] = next((c["id"] for c in connections if c.get("name") == EXPLORER_CONNECTION), None)
         except (urllib.error.URLError, OSError, ValueError):
             pass
         return found
