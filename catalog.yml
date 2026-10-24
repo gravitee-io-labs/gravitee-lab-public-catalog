@@ -4,7 +4,7 @@ x-gravitee-catalog:
   id: gravitee
   name: Gravitee public
   description: Playgrounds, setups and add-ons of the Lab
-  version: 1.0.0
+  version: 1.1.0
   lab: 1
   license: AGPL-3.0-only
   images: ghcr.io/gravitee-io-labs/gravitee-lab-public-catalog
