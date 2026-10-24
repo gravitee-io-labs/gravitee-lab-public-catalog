@@ -2,7 +2,9 @@ FROM python:3.14-slim@sha256:a2b82f3c48559aa0a8446d9af49826b6e2b2016f4cd2afabfe6
 ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
 WORKDIR /app
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+# pip leaves with the build: the app never runs it, and what it vendors (certifi, urllib3) would stay in the image unpatched
+RUN pip install -r requirements.txt \
+ && pip uninstall -y pip
 COPY *.py openapi.json ./
 # The tests ship in the image and run there with the app's own dependencies.
 COPY tests ./tests
