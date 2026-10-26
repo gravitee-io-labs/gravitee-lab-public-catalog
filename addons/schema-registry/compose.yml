@@ -10,7 +10,7 @@ include:
 services:
 
   schema-registry:
-    image: confluentinc/cp-schema-registry:${SCHEMA_REGISTRY_VERSION:-7.9.10}   # Schema Registry version (image tag)
+    image: confluentinc/cp-schema-registry:${SCHEMA_REGISTRY_VERSION:-8.3.2}   # Schema Registry version (image tag)
     container_name: gio-schema-registry
     restart: unless-stopped
     depends_on:
@@ -26,7 +26,7 @@ services:
       io.gravitee.name: Schema Registry
       io.gravitee.description: Confluent Schema Registry, the schemas of the lab's Kafka topics
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8081/subjects >/dev/null"]
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8081/subjects', timeout=2)"]   # The image has no curl
       interval: 5s
       timeout: 3s
       retries: 30

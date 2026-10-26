@@ -1,17 +1,19 @@
 #!/bin/sh
-# Makes the self-signed certificates the Kafka add-on mounts, in /certs: the broker's (server.key, server.crt) and the ones of
-# the gateway's Kafka entrypoint (kafka-gateway.p12, and kafka-gateway.crt, the certificate that clients trust). Only what is
-# missing is made, so the files stay the same from one start to the next.
+# Makes the self-signed certificates the Kafka add-on mounts, in /certs: the broker's (server.key, server.crt, and the
+# kafka-broker.p12 keystore and kafka-broker-trust.p12 truststore it reads, with their password in kafka-broker.password) and the
+# ones of the gateway's Kafka entrypoint (kafka-gateway.p12, and kafka-gateway.crt, the certificate that clients trust). Only what
+# is missing is made, so the files stay the same from one start to the next.
 # It runs in the kafka-certs service, never on the host. CERTS_DIR names another folder, which the tests use.
 set -eu
 
 DAYS=3650
 DIR=${CERTS_DIR:-/certs}
 
-# The password of the gateway's keystore is the setting KAFKA_GATEWAY_KEYSTORE_PASSWORD, which compose.yml hands to the service.
-# openssl reads it from the environment, so that it appears in no command line
+# The passwords of the keystores are the settings KAFKA_BROKER_KEYSTORE_PASSWORD and KAFKA_GATEWAY_KEYSTORE_PASSWORD, which
+# compose.yml hands to the service. openssl reads them from the environment, so that they appear in no command line
+KAFKA_BROKER_KEYSTORE_PASSWORD=${KAFKA_BROKER_KEYSTORE_PASSWORD:-gravitee}
 KAFKA_GATEWAY_KEYSTORE_PASSWORD=${KAFKA_GATEWAY_KEYSTORE_PASSWORD:-gravitee}
-export KAFKA_GATEWAY_KEYSTORE_PASSWORD
+export KAFKA_BROKER_KEYSTORE_PASSWORD KAFKA_GATEWAY_KEYSTORE_PASSWORD
 
 cd "$DIR"
 # Files are made in a folder of the destination, so that moving one in is a rename and an interrupted run leaves no half file.
@@ -40,14 +42,37 @@ for f in server.key server.crt; do
     if [ -d "$f" ]; then rmdir "$f"; fi
 done
 
-# Broker (KAFKA_TLS_TYPE: PEM): its key, and its certificate, which is also its truststore (whose client certificates it
-# accepts: the image wants one). The container reads them as uid 1001, who owns nothing here.
+# Broker: its key and its certificate, which is also its truststore (whose client certificates it accepts: the image wants
+# one). The container reads them as uid 1000, who owns nothing here.
 if [ ! -f server.key ] || [ ! -f server.crt ]; then
+    rm -f kafka-broker.p12 kafka-broker-trust.p12
     selfsigned "$work/server.key" "$work/server.crt" "/C=FR/O=Gravitee Lab/CN=kafka" \
         "DNS:kafka,DNS:localhost,DNS:kafka.local,DNS:*.kafka.local"
     chmod 644 "$work/server.key"
     mv "$work/server.key" "$work/server.crt" .
     made=1
+fi
+
+# The broker reads them as PKCS12 stores, which open with the password the file kafka-broker.password holds: stores that do not
+# open with the setting are made again
+if [ -f kafka-broker.p12 ] \
+        && ! openssl pkcs12 -in kafka-broker.p12 -noout -passin env:KAFKA_BROKER_KEYSTORE_PASSWORD >/dev/null 2>&1; then
+    rm -f kafka-broker.p12 kafka-broker-trust.p12
+fi
+if [ ! -f kafka-broker.p12 ] || [ ! -f kafka-broker-trust.p12 ]; then
+    quiet openssl pkcs12 -export -in server.crt -inkey server.key -name kafka -keypbe AES-256-CBC -certpbe AES-256-CBC \
+        -macalg sha256 -out "$work/kafka-broker.p12" -passout env:KAFKA_BROKER_KEYSTORE_PASSWORD
+    # -jdktrust marks the certificate as trusted, as Java wants of a truststore
+    quiet openssl pkcs12 -export -in server.crt -nokeys -jdktrust anyExtendedKeyUsage -name kafka -certpbe AES-256-CBC \
+        -macalg sha256 -out "$work/kafka-broker-trust.p12" -passout env:KAFKA_BROKER_KEYSTORE_PASSWORD
+    chmod 644 "$work/kafka-broker.p12" "$work/kafka-broker-trust.p12"
+    mv "$work/kafka-broker.p12" "$work/kafka-broker-trust.p12" .
+    made=1
+fi
+if [ "$(cat kafka-broker.password 2>/dev/null)" != "$KAFKA_BROKER_KEYSTORE_PASSWORD" ]; then
+    printf '%s' "$KAFKA_BROKER_KEYSTORE_PASSWORD" > "$work/kafka-broker.password"
+    chmod 644 "$work/kafka-broker.password"
+    mv "$work/kafka-broker.password" .
 fi
 
 # Gateway: one wildcard certificate for every API host under kafka.local, in a PKCS12 keystore. A keystore keeps the password it

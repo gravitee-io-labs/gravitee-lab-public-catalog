@@ -90,7 +90,7 @@ kcat -b orders.kafka.local:9092 -C -t orders -o beginning -e \
 
 ## What stays after removal
 
-The certificates live in the Docker volume `data-streams-certs`, the blobs in `data-azurite` and the topics and schemas in `data-kafka`. Stopping keeps them, and `make reset` deletes them. *Delete what it created* in the Lab UI removes the APIs, the applications, the Access Management domain, the portal menu and the Explorer connection.
+The certificates live in the Docker volume `data-streams-certs`, the blobs in `data-azurite` and the topics and schemas in `data-kafka-broker`. Stopping keeps them, and `make reset` deletes them. *Delete what it created* in the Lab UI removes the APIs, the applications, the Access Management domain, the portal menu and the Explorer connection.
 
 ## Share it
 

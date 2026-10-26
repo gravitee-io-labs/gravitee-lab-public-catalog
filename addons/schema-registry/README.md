@@ -20,4 +20,4 @@ curl -s http://localhost:8097/subjects
 
 ## What stays after removal
 
-The schemas live in the Kafka topic `_schemas`, so in the Docker volume `data-kafka`. Stopping keeps them, and `make reset` deletes them.
+The schemas live in the Kafka topic `_schemas`, so in the Docker volume `data-kafka-broker`. Stopping keeps them, and `make reset` deletes them.
