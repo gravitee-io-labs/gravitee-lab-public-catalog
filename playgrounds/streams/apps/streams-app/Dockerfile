@@ -2,7 +2,9 @@ FROM python:3.13-slim@sha256:70729b46c69b4f1e97c4822c1af3df53a1476cf5ddc6c087c0c
 ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
 WORKDIR /app
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+# pip leaves with the build: the app never runs it, and what it vendors (certifi, urllib3) would stay in the image unpatched
+RUN pip install -r requirements.txt \
+ && pip uninstall -y pip
 COPY *.py ./
 # The page, its stylesheet, its script and the logos: nothing is loaded from outside.
 COPY static ./static
