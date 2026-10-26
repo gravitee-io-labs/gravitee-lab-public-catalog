@@ -1,5 +1,5 @@
-a2a-sdk[http-server]==1.2.2
-starlette==1.7.0
+a2a-sdk[http-server]==1.2.3
+starlette==1.9.0
 uvicorn==0.54.0
 httpx==0.28.1
 # certifi: the CA bundle the others use, at the first release past GHSA-6q48-6c7w-9gw2 (emSign roots whose intermediate keys were compromised)
