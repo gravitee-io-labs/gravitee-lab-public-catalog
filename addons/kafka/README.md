@@ -2,7 +2,7 @@
 
 A single-node Kafka broker (KRaft), Kafka UI, a container with the Kafka command-line tools, and the APIM gateway's native Kafka entrypoint.
 
-The broker image is Bitnami's legacy image, `docker.io/bitnamilegacy/kafka:3.9`, which receives no updates.
+The broker is the official Apache Kafka image, `apache/kafka`.
 
 ## Open it
 
@@ -50,6 +50,7 @@ The service `kafka-certs` (`gio-kafka-certs`) makes the certificates when the ad
 | File | What it is |
 |---|---|
 | `server.key`, `server.crt` | The broker's key and certificate, for `kafka`, `localhost`, `kafka.local` and `*.kafka.local`. The certificate is also the broker's truststore. A client certificate is requested, not required |
+| `kafka-broker.p12`, `kafka-broker-trust.p12`, `kafka-broker.password` | The same key and certificate as the PKCS12 keystore and truststore the broker reads, and their password, `KAFKA_BROKER_KEYSTORE_PASSWORD` |
 | `kafka-gateway.p12` | The gateway's keystore, with a wildcard certificate for `*.kafka.local`. Its password is `KAFKA_GATEWAY_KEYSTORE_PASSWORD`, `gravitee` by default |
 | `kafka-gateway.crt` | The certificate that clients trust, taken from the keystore |
 
@@ -57,9 +58,9 @@ To change the keystore password, set `KAFKA_GATEWAY_KEYSTORE_PASSWORD` in the ad
 
 ## Demo users
 
-The SASL listeners (`9095`, `9096`) enable `PLAIN`, `SCRAM-SHA-256` and `SCRAM-SHA-512`. The client user is `gravitee_user` with the password `gravitee_password`. The other users of the broker are internal. The plaintext listener needs no user.
+The SASL listeners (`9095`, `9096`) enable `PLAIN`, `SCRAM-SHA-256` and `SCRAM-SHA-512`. The client user is `gravitee_user` with the password `gravitee_password`. The plaintext listener needs no user.
 
-Each password is a setting: see [Settings](#settings). The broker stores the SCRAM credentials of `gravitee_user` when its data is created, so set `KAFKA_CLIENT_PASSWORD` before the first start, or remove the volume `data-kafka` (the topics go with it): [Data and volumes](https://github.com/dobl1/gravitee-lab/blob/main/docs/configuration.md#data-and-volumes).
+The password is the setting `KAFKA_CLIENT_PASSWORD`: see [Settings](#settings). The service `kafka-users` (`gio-kafka-users`) stores the SCRAM credentials of `gravitee_user` in the broker at each start, then exits: it shows as **Done**. A new password applies at the next start.
 
 ## Settings
 
@@ -69,12 +70,13 @@ Each password is a setting: see [Settings](#settings). The broker stores the SCR
 | `KAFKA_UI_VERSION` | Kafka UI version (image tag) |
 | `KAFKA_CERTS_VERSION` | OpenSSL version (image tag) of the service that makes the certificates |
 | `KAFKA_CLIENT_PASSWORD` | Password of the SASL user `gravitee_user`. Default `gravitee_password` |
-| `KAFKA_CONTROLLER_PASSWORD` | Password of the broker's controller user, `controller_user`. Default `controller_password` |
-| `KAFKA_INTER_BROKER_PASSWORD` | Password of the user the brokers use between them, `inter_broker_user`. Default `inter_broker_password` |
+| `KAFKA_BROKER_KEYSTORE_PASSWORD` | Password of the broker's keystore and truststore. Default `gravitee`. A new value makes them again at the next start |
 | `KAFKA_GATEWAY_KEYSTORE_PASSWORD` | Password of the gateway's keystore, `kafka-gateway.p12`. Default `gravitee`. See [Certificates](#certificates) |
 
 Choose the versions on the Images page of the Lab UI. The passwords are public demo values: change them in the settings form.
 
 ## What stays after removal
 
-The topics live in the Docker volume `data-kafka`. Stopping the add-on keeps them, and `make reset` deletes them. The certificates stay in the add-on's `.state` folder.
+The topics live in the Docker volume `data-kafka-broker`. Stopping the add-on keeps them, and `make reset` deletes them. The certificates stay in the add-on's `.state` folder.
+
+The volume `data-kafka` held the topics of the broker the add-on ran before, Bitnami's image, which the official image cannot read. Nothing uses it any more: `docker volume rm gravitee_data-kafka` removes it.

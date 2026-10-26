@@ -7,7 +7,7 @@ x-gravitee:
 services:
 
   kafka:
-    image: docker.io/bitnamilegacy/kafka:${KAFKA_VERSION:-3.9}   # Kafka version (image tag)
+    image: apache/kafka:${KAFKA_VERSION:-4.3.1}   # Kafka version (image tag)
     container_name: gio-kafka
     restart: unless-stopped
     depends_on:
@@ -19,42 +19,52 @@ services:
       - "127.0.0.1:9095:9095"   # SASL_PLAINTEXT
       - "127.0.0.1:9096:9096"   # SASL_SSL
     volumes:
-      - data-kafka:/bitnami/kafka
-      # Key, certificate and truststore made by kafka-certs
-      - ./.state/certs/server.key:/bitnami/kafka/config/certs/kafka.keystore.key:ro
-      - ./.state/certs/server.crt:/bitnami/kafka/config/certs/kafka.keystore.pem:ro
-      - ./.state/certs/server.crt:/bitnami/kafka/config/certs/kafka.truststore.pem:ro
+      - data-kafka-broker:/var/lib/kafka/data
+      # Keystore, truststore and their password file, made by kafka-certs
+      - ./.state/certs:/etc/kafka/secrets:ro
     environment:
-      # KRaft
-      KAFKA_CFG_NODE_ID: "0"
-      KAFKA_CFG_PROCESS_ROLES: controller,broker
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@localhost:9093
-      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      # KRaft, one node that is its own controller
+      KAFKA_NODE_ID: "0"
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 0@localhost:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
 
       # Listeners
-      ALLOW_PLAINTEXT_LISTENER: "yes"
-      KAFKA_CFG_LISTENERS: PLAINTEXT://:9091,CONTROLLER://:9093,SSL://:9094,SASL_PLAINTEXT://:9095,SASL_SSL://:9096
-      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9091,SSL://kafka:9094,SASL_PLAINTEXT://kafka:9095,SASL_SSL://kafka:9096
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL,CONTROLLER:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://:9091,CONTROLLER://:9093,SSL://:9094,SASL_PLAINTEXT://:9095,SASL_SSL://:9096
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9091,SSL://kafka:9094,SASL_PLAINTEXT://kafka:9095,SASL_SSL://kafka:9096
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
 
-      # SASL
-      KAFKA_CFG_SASL_ENABLED_MECHANISMS: PLAIN,SCRAM-SHA-256,SCRAM-SHA-512
-      KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
-      KAFKA_CLIENT_USERS: gravitee_user
-      KAFKA_CLIENT_PASSWORDS: ${KAFKA_CLIENT_PASSWORD:-gravitee_password}   # Password of the SASL user gravitee_user
-      KAFKA_CONTROLLER_USER: controller_user
-      KAFKA_CONTROLLER_PASSWORD: ${KAFKA_CONTROLLER_PASSWORD:-controller_password}   # Password of the broker's controller user
-      KAFKA_INTER_BROKER_USER: inter_broker_user
-      KAFKA_INTER_BROKER_PASSWORD: ${KAFKA_INTER_BROKER_PASSWORD:-inter_broker_password}   # Password of the user the brokers use between them
+      # SASL: gravitee_user signs in with PLAIN or SCRAM (kafka-users stores its SCRAM credentials)
+      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN,SCRAM-SHA-256,SCRAM-SHA-512
+      KAFKA_LISTENER_NAME_SASL__PLAINTEXT_PLAIN_SASL_JAAS_CONFIG: &plain-users org.apache.kafka.common.security.plain.PlainLoginModule required user_gravitee_user="${KAFKA_CLIENT_PASSWORD:-gravitee_password}";   # Password of the SASL user gravitee_user
+      KAFKA_LISTENER_NAME_SASL__SSL_PLAIN_SASL_JAAS_CONFIG: *plain-users
+      KAFKA_LISTENER_NAME_SASL__PLAINTEXT_SCRAM___SHA___256_SASL_JAAS_CONFIG: &scram org.apache.kafka.common.security.scram.ScramLoginModule required;
+      KAFKA_LISTENER_NAME_SASL__PLAINTEXT_SCRAM___SHA___512_SASL_JAAS_CONFIG: *scram
+      KAFKA_LISTENER_NAME_SASL__SSL_SCRAM___SHA___256_SASL_JAAS_CONFIG: *scram
+      KAFKA_LISTENER_NAME_SASL__SSL_SCRAM___SHA___512_SASL_JAAS_CONFIG: *scram
+      KAFKA_OPTS: -Djava.security.auth.login.config=/opt/kafka/config/kafka_server_jaas.conf   # The image asks for it with SASL listeners; the listeners above carry their own login
 
-      # TLS
-      KAFKA_TLS_TYPE: PEM   # The key is not encrypted: do not set KAFKA_CERTIFICATE_PASSWORD
-      KAFKA_TLS_CLIENT_AUTH: requested
-      KAFKA_CFG_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ""
+      # TLS: PKCS12 keystore and truststore in /etc/kafka/secrets, as the image reads them
+      KAFKA_SSL_KEYSTORE_TYPE: PKCS12
+      KAFKA_SSL_KEYSTORE_FILENAME: kafka-broker.p12
+      KAFKA_SSL_KEYSTORE_CREDENTIALS: kafka-broker.password
+      KAFKA_SSL_KEY_CREDENTIALS: kafka-broker.password
+      KAFKA_SSL_TRUSTSTORE_TYPE: PKCS12
+      KAFKA_SSL_TRUSTSTORE_FILENAME: kafka-broker-trust.p12
+      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka-broker.password
+      KAFKA_SSL_CLIENT_AUTH: requested
 
-      # Broker
-      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      # Broker: one node, so every internal topic has one replica
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_NUM_PARTITIONS: "1"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_SHARE_COORDINATOR_STATE_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_SHARE_COORDINATOR_STATE_TOPIC_MIN_ISR: "1"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
     labels:
       io.gravitee.name: Kafka broker
       io.gravitee.description: Single-node Kafka broker with plaintext, SSL and SASL listeners
@@ -67,8 +77,33 @@ services:
     networks:
       - internal
 
+  kafka-users:
+    image: apache/kafka:${KAFKA_VERSION:-4.3.1}
+    container_name: gio-kafka-users
+    restart: "no"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      CLIENT_PASSWORD: ${KAFKA_CLIENT_PASSWORD:-gravitee_password}   # Password of the SASL user gravitee_user
+    # One request per mechanism: the broker refuses two changes of one user in one request
+    entrypoint:
+      - sh
+      - -c
+      - |
+        set -e
+        for mechanism in SCRAM-SHA-256 SCRAM-SHA-512; do
+          /opt/kafka/bin/kafka-configs.sh --bootstrap-server kafka:9091 --alter --entity-type users --entity-name gravitee_user \
+            --add-config "$$mechanism=[password=$$CLIENT_PASSWORD]"
+        done
+    labels:
+      io.gravitee.name: Kafka users
+      io.gravitee.description: Stores the SCRAM credentials of gravitee_user in the broker at each start, then exits
+    networks:
+      - internal
+
   kafka-client:
-    image: docker.io/bitnamilegacy/kafka:${KAFKA_VERSION:-3.9}
+    image: apache/kafka:${KAFKA_VERSION:-4.3.1}
     container_name: gio-kafka-client
     restart: unless-stopped
     entrypoint: ["tail", "-f", "/dev/null"]
@@ -76,8 +111,12 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
+      kafka-users:   # the guide's SCRAM commands need gravitee_user's credentials, which kafka-users stores
+        condition: service_completed_successfully
     volumes:
       - ./.state/certs:/app/.ssl:ro
+    environment:
+      PATH: /opt/kafka/bin:/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin   # The Kafka command-line tools, by name
     labels:
       io.gravitee.name: Kafka client
       io.gravitee.description: Container with the Kafka command-line tools, to run against the broker
@@ -118,6 +157,7 @@ services:
     restart: "no"
     entrypoint: ["sh", "/certs.sh"]   # Makes what is missing in /certs, then exits
     environment:
+      KAFKA_BROKER_KEYSTORE_PASSWORD: ${KAFKA_BROKER_KEYSTORE_PASSWORD:-gravitee}   # Password of the broker's keystore and truststore, kafka-broker.p12 and kafka-broker-trust.p12; a new value makes them again at the next start
       KAFKA_GATEWAY_KEYSTORE_PASSWORD: ${KAFKA_GATEWAY_KEYSTORE_PASSWORD:-gravitee}   # Password of the gateway's keystore, kafka-gateway.p12; a new value makes the gateway's certificate again at the next start
     volumes:
       - ./.state/certs:/certs
@@ -145,4 +185,4 @@ services:
       gravitee_kafka_ssl_keystore_password: ${KAFKA_GATEWAY_KEYSTORE_PASSWORD:-gravitee}
 
 volumes:
-  data-kafka:
+  data-kafka-broker:
