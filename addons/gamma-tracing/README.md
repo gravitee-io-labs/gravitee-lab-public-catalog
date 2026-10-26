@@ -27,7 +27,7 @@ None.
 
 | Setting | Default | Meaning |
 |---|---|---|
-| `OTEL_COLLECTOR_VERSION` | `0.162.0` | OpenTelemetry Collector version (image tag), chosen on the Images page |
+| `OTEL_COLLECTOR_VERSION` | `0.163.2` | OpenTelemetry Collector version (image tag), chosen on the Images page |
 
 The collector reads [`otel-collector.yml`](otel-collector.yml) when it starts. After you edit that file, restart it:
 

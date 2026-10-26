@@ -90,7 +90,7 @@ services:
       - internal
 
   streams-hosts:
-    image: alpine/socat:${STREAMS_SOCAT_VERSION:-1.8.0.3}   # socat version (image tag), which forwards the Kafka host names to the gateway
+    image: alpine/socat:${STREAMS_SOCAT_VERSION:-1.8.1.3}   # socat version (image tag), which forwards the Kafka host names to the gateway
     container_name: gio-streams-hosts
     restart: unless-stopped
     command: ["TCP-LISTEN:9092,fork,reuseaddr", "TCP:apim-gateway:9092"]   # Raw TCP: the TLS handshake, and the host name in it, reach the gateway untouched

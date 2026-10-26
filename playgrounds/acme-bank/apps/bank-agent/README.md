@@ -106,7 +106,7 @@ The agent card is then at `http://localhost:8000/.well-known/agent-card.json`.
 docker build -q -t bank-agent-test . && docker run --rm --entrypoint python bank-agent-test -m unittest discover -s tests -t .
 ```
 
-Without Docker, in a Python 3.14 virtual environment with the pins of `requirements.txt`:
+Without Docker, in a Python 3.15 virtual environment with the pins of `requirements.txt`:
 `python -m unittest discover -s tests -t .` from this folder.
 
 The fakes in `tests/fakes.py` stand in for the model (a stub OpenAI server), the bank (an in-memory MCP server with the

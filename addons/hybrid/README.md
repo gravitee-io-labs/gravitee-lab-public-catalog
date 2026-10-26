@@ -33,7 +33,7 @@ It listens on `127.0.0.1` only. Its internal API (18082) and its Redis (6379) ar
 |---|---|---|
 | `HYBRID_CLOUD_TOKEN` | none | The token of the hybrid gateway that runs here. The Gravitee Cloud page writes it when it creates the first gateway or starts another |
 | `HYBRID_LICENSE` | the core's license | A license key with the feature `apim-bridge-gateway` |
-| `HYBRID_GATEWAY_VERSION`, `HYBRID_GATEWAY_REGISTRY` | `4.12.21-debian`, `graviteeio` | Version and Docker registry of the gateway image, chosen on the Images page. The Debian image is what the AI policies need, like the core's gateway. Keep its minor version equal to your control plane's |
+| `HYBRID_GATEWAY_VERSION`, `HYBRID_GATEWAY_REGISTRY` | `4.12.23-debian`, `graviteeio` | Version and Docker registry of the gateway image, chosen on the Images page. The Debian image is what the AI policies need, like the core's gateway. Keep its minor version equal to your control plane's |
 | `HYBRID_REDIS_VERSION` | the core's Redis version | Version of the Redis image of the add-on, chosen on the Images page |
 
 They stay on your machine, in a file that git ignores.

@@ -212,7 +212,7 @@ docker build -q -t bank-web-test . && docker run --rm --entrypoint python bank-w
 ```
 
 Add `-v <playground>/guide.md:/guide.md:ro -e GUIDE=/guide.md` to run the checks of the guide too; without it they are
-skipped. Without Docker, in a Python 3.14 virtual environment with the pins of `requirements.txt`: `python -m unittest
+skipped. Without Docker, in a Python 3.15 virtual environment with the pins of `requirements.txt`: `python -m unittest
 discover -s tests -t .` from this folder. The tests run the real app over in-memory fakes of Access Management, the
 gateway, the bank's MCP server, the management API and the traffic generator (`tests/fakes.py`).
 

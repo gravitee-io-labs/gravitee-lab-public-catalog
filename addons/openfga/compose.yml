@@ -7,7 +7,7 @@ x-gravitee:
 services:
 
   openfga-postgres:
-    image: postgres:${OPENFGA_POSTGRES_VERSION:-17.9}   # PostgreSQL version (image tag)
+    image: postgres:${OPENFGA_POSTGRES_VERSION:-17.11}   # PostgreSQL version (image tag)
     container_name: gio-openfga-postgres
     restart: unless-stopped
     volumes:
@@ -28,7 +28,7 @@ services:
       - internal
 
   openfga-migrate:
-    image: openfga/openfga:${OPENFGA_VERSION:-v1.21.0}   # OpenFGA version (image tag)
+    image: openfga/openfga:${OPENFGA_VERSION:-v1.22.0}   # OpenFGA version (image tag)
     container_name: gio-openfga-migrate
     command: migrate
     depends_on:
@@ -44,7 +44,7 @@ services:
       - internal
 
   openfga:
-    image: openfga/openfga:${OPENFGA_VERSION:-v1.21.0}
+    image: openfga/openfga:${OPENFGA_VERSION:-v1.22.0}
     container_name: gio-openfga
     restart: unless-stopped
     command: run

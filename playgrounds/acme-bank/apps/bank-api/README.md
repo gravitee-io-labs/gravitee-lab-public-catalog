@@ -52,7 +52,7 @@ Uvicorn's access log is the log: one line per request.
 docker build -q -t bank-api-test . && docker run --rm --entrypoint python bank-api-test -m unittest discover -s tests -t .
 ```
 
-Without Docker, in a Python 3.14 virtual environment with the pins of `requirements.txt`:
+Without Docker, in a Python 3.15 virtual environment with the pins of `requirements.txt`:
 `python -m unittest discover -s tests -t .` from this folder.
 
 `httpx2` is in `requirements.txt` for the tests only: it is the client of Starlette's test client.
