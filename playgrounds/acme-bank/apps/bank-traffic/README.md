@@ -214,7 +214,7 @@ docker build -q -t bank-traffic . && docker run --rm -p 127.0.0.1:8000:8000 --en
 docker build -q -t bank-traffic-test . && docker run --rm --entrypoint python bank-traffic-test -m unittest discover -s tests -t .
 ```
 
-Without Docker, in a Python 3.14 virtual environment with the pins of `requirements.txt`:
+Without Docker, in a Python 3.15 virtual environment with the pins of `requirements.txt`:
 `python -m unittest discover -s tests -t .` from this folder.
 
 They run against a fake platform in memory (AM, the three proxies, the AI workspace, Gamma and Ace behind the real

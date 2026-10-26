@@ -26,8 +26,8 @@ Every port binds `127.0.0.1`. The Playground calls the HTTP API from your browse
 
 | Setting | Default | Meaning |
 |---|---|---|
-| `OPENFGA_VERSION` | `v1.21.0` | OpenFGA version (image tag) |
-| `OPENFGA_POSTGRES_VERSION` | `17.9` | PostgreSQL version (image tag) |
+| `OPENFGA_VERSION` | `v1.22.0` | OpenFGA version (image tag) |
+| `OPENFGA_POSTGRES_VERSION` | `17.11` | PostgreSQL version (image tag) |
 | `OPENFGA_POSTGRES_PASSWORD` | `openfga` | Password of the database user `openfga`. The database keeps the password it was first created with: set it before the first start, or remove the add-on's data volume, which deletes the stores and models ([how](https://github.com/gravitee-io-labs/gravitee-lab/blob/main/docs/configuration.md#data-and-volumes)) |
 
 ## What stays after removal

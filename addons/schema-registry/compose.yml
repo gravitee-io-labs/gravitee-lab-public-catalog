@@ -10,7 +10,7 @@ include:
 services:
 
   schema-registry:
-    image: confluentinc/cp-schema-registry:${SCHEMA_REGISTRY_VERSION:-7.9.0}   # Schema Registry version (image tag)
+    image: confluentinc/cp-schema-registry:${SCHEMA_REGISTRY_VERSION:-7.9.10}   # Schema Registry version (image tag)
     container_name: gio-schema-registry
     restart: unless-stopped
     depends_on:

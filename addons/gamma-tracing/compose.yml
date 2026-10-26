@@ -9,7 +9,7 @@ x-gravitee:
 services:
 
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:${OTEL_COLLECTOR_VERSION:-0.162.0}   # OpenTelemetry Collector version (image tag)
+    image: otel/opentelemetry-collector-contrib:${OTEL_COLLECTOR_VERSION:-0.163.2}   # OpenTelemetry Collector version (image tag)
     container_name: gio-otel-collector
     restart: unless-stopped
     volumes:

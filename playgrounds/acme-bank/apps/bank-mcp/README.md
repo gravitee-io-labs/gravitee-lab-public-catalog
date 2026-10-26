@@ -115,5 +115,5 @@ The log has one line per MCP request, naming the tool, the prompt or the resourc
 docker build -q -t bank-mcp-test . && docker run --rm --entrypoint python bank-mcp-test -m unittest discover -s tests -t .
 ```
 
-Without Docker, in a Python 3.14 virtual environment with the pins of `requirements.txt`:
+Without Docker, in a Python 3.15 virtual environment with the pins of `requirements.txt`:
 `python -m unittest discover -s tests -t .` from this folder.

@@ -10,7 +10,7 @@ services:
     build:
       context: .
       args:
-        MCPJAM_VERSION: ${MCP_INSPECTOR_VERSION:-3.13.0}   # MCPJam Inspector version (npm package @mcpjam/inspector)
+        MCPJAM_VERSION: ${MCP_INSPECTOR_VERSION:-3.16.1}   # MCPJam Inspector version (npm package @mcpjam/inspector)
     image: ghcr.io/gravitee-io-labs/gravitee-lab-public-catalog/mcp-inspector-mcp-inspector:latest
     pull_policy: ${MCP_INSPECTOR_PULL_POLICY:-build}   # build: build it here at each start; never: build it here once; always: pull it, build it here if it cannot be pulled
     container_name: gio-mcp-inspector

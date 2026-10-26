@@ -7,7 +7,7 @@ x-gravitee:
 services:
 
   azurite:
-    image: mcr.microsoft.com/azure-storage/azurite:${AZURITE_VERSION:-3.35.0}   # Azurite version (image tag)
+    image: mcr.microsoft.com/azure-storage/azurite:${AZURITE_VERSION:-3.37.0}   # Azurite version (image tag)
     container_name: gio-azurite
     restart: unless-stopped
     command: ["azurite-blob", "--blobHost", "0.0.0.0", "--blobPort", "10000", "--location", "/data", "--skipApiVersionCheck", "--loose"]   # Blob service only; --loose accepts what a real account would

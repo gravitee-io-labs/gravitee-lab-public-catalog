@@ -13,7 +13,7 @@ x-gravitee:
 services:
 
   apim-hybrid-gateway:
-    image: ${HYBRID_GATEWAY_REGISTRY:-graviteeio}/apim-gateway:${HYBRID_GATEWAY_VERSION:-4.12.21-debian}   # Docker registry and version of the gateway image
+    image: ${HYBRID_GATEWAY_REGISTRY:-graviteeio}/apim-gateway:${HYBRID_GATEWAY_VERSION:-4.12.23-debian}   # Docker registry and version of the gateway image
     container_name: gio-apim-hybrid-gateway
     restart: unless-stopped
     depends_on:
@@ -60,7 +60,7 @@ services:
       - internal
 
   hybrid-redis:
-    image: redis:${HYBRID_REDIS_VERSION:-${REDIS_VERSION:-8.10.1-alpine}}   # Redis version (image tag), the core's one by default
+    image: redis:${HYBRID_REDIS_VERSION:-${REDIS_VERSION:-8.10.3-alpine}}   # Redis version (image tag), the core's one by default
     container_name: gio-hybrid-redis
     restart: unless-stopped
     command: redis-server --requirepass ${REDIS_PASSWORD:-redispassword}

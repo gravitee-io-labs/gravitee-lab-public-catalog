@@ -1,5 +1,5 @@
 starlette==1.9.0
 uvicorn==0.54.0
-httpx2==2.14.0
+httpx2==2.15.1
 # certifi: the CA bundle the others use, at the first release past GHSA-6q48-6c7w-9gw2 (emSign roots whose intermediate keys were compromised)
 certifi==2026.10.19
