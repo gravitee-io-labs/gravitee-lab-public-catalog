@@ -8,7 +8,7 @@ x-gravitee:
   gateway:   # The gateway of a platform that this add-on runs here, and the setting that takes its token
     platform: cloud
     service: apim-hybrid-gateway
-    token: HYBRID_CLOUD_TOKEN
+    token: HYBRID_GATEWAY_CLOUD_TOKEN
 
 services:
 
@@ -27,8 +27,8 @@ services:
       - "host.docker.internal:host-gateway"   # Lets a backend URL name this machine, also on Linux
     environment:
       # License, Gravitee Cloud
-      gravitee_license_key: ${HYBRID_LICENSE:-${GRAVITEE_LICENSE:-}}   # License key with the feature apim-bridge-gateway; the core's license when empty
-      gravitee_cloud_token: ${HYBRID_CLOUD_TOKEN}   # Token of the hybrid gateway, written by the Gravitee Cloud page when it creates or starts the gateway
+      gravitee_license_key: ${HYBRID_GATEWAY_LICENSE:-${GRAVITEE_LICENSE:-}}   # License key with the feature apim-bridge-gateway; the core's license when empty
+      gravitee_cloud_token: ${HYBRID_GATEWAY_CLOUD_TOKEN}   # Token of the hybrid gateway, written by the Gravitee Cloud page when it creates or starts the gateway
 
       # Plugins
       gravitee_plugins_path_0: $${gravitee.home}/plugins

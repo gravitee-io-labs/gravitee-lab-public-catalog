@@ -37,21 +37,21 @@ class DescriptionTest(unittest.TestCase):
 class SettingsTest(unittest.TestCase):
     """The settings of an add-on are prefixed with its id; the image variables follow the name of their component."""
 
-    PREFIXES = {"mcp-inspector": "MCP_INSPECTOR_"}
+    PREFIXES = {"mcpjam-inspector": "MCPJAM_INSPECTOR_"}
 
     def test_these_add_ons_name_their_settings_after_themselves(self):
         for item, prefix in self.PREFIXES.items():
             text = (ROOT / "addons" / item / "compose.yml").read_text()
             for name in sorted(set(VARIABLE.findall(text))):
                 with self.subTest(f"{item} {name}"):
-                    own = name.startswith(prefix) or name in SHARED or name.endswith(("_REGISTRY", "_VERSION"))
+                    own = name.startswith(prefix) or name in SHARED or name.endswith(("_REGISTRY", "_VERSION", "_PULL_POLICY"))
                     self.assertTrue(own, f"{name} does not start with {prefix}")
 
     def test_the_inspector_keeps_the_names_its_package_reads_inside_the_container(self):
-        text = (ROOT / "addons/mcp-inspector/compose.yml").read_text()
-        self.assertRegex(text, r"(?m)^\s+MCPJAM_SESSION_TOKEN: \$\{MCP_INSPECTOR_SESSION_TOKEN:-")
-        self.assertRegex(text, r"(?m)^\s+MCPJAM_ALLOWED_HOSTS: \$\{MCP_INSPECTOR_ALLOWED_HOSTS:-")
-        self.assertRegex(text, r"#token=\$\{MCP_INSPECTOR_SESSION_TOKEN:-")
+        text = (ROOT / "addons/mcpjam-inspector/compose.yml").read_text()
+        self.assertRegex(text, r"(?m)^\s+MCPJAM_SESSION_TOKEN: \$\{MCPJAM_INSPECTOR_SESSION_TOKEN:-")
+        self.assertRegex(text, r"(?m)^\s+MCPJAM_ALLOWED_HOSTS: \$\{MCPJAM_INSPECTOR_ALLOWED_HOSTS:-")
+        self.assertRegex(text, r"#token=\$\{MCPJAM_INSPECTOR_SESSION_TOKEN:-")
 
 
 if __name__ == "__main__":

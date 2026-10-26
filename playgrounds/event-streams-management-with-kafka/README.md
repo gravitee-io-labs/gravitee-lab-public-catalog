@@ -70,14 +70,14 @@ kcat -b orders.kafka.local:9092 -C -t orders -o beginning -e \
 
 | Setting | Meaning |
 |---|---|
-| `STREAMS_APIM_PASSWORD` | Password of user `admin` in API Management, which the seed and the app's switches sign in with. Default `admin` |
-| `STREAMS_AM_PASSWORD` | Password of user `admin` in Access Management, which the seed signs in with. Default `adminadmin` |
-| `STREAMS_ORDERS_KEY` | API key of the **Order dashboard** application. Set it before the first start: the seed gives the subscription this key and keeps it afterwards |
-| `STREAMS_PARTNER_FR_KEY`, `STREAMS_PARTNER_DE_KEY` | API keys of **Partner France** and **Partner Germany**, on their plans of the Orders Events API. Same rule as the dashboard's |
-| `STREAMS_PARTNER_SECRET` | Client secret of the **Partner portal** application in Access Management, with which it gets its tokens |
-| `STREAMS_ENCRYPTION_KEY` | Base64 AES-256 key of the encryption policy. A new value, applied with Re-seed, makes the records already encrypted unreadable |
-| `STREAMS_BLOB_ACCOUNT_KEY` | Base64 key of the Azurite account `devstoreaccount1`, with which the gateway signs what it offloads. A demo value by default |
-| `STREAMS_BLOB_CONNECTION_STRING` | Connection string of the Azurite account where large records are offloaded. It carries the key above by default |
+| `GRAVITEE_STREAMS_APIM_PASSWORD` | Password of user `admin` in API Management, which the seed and the app's switches sign in with. Default `admin` |
+| `GRAVITEE_STREAMS_AM_PASSWORD` | Password of user `admin` in Access Management, which the seed signs in with. Default `adminadmin` |
+| `GRAVITEE_STREAMS_ORDERS_KEY` | API key of the **Order dashboard** application. Set it before the first start: the seed gives the subscription this key and keeps it afterwards |
+| `GRAVITEE_STREAMS_PARTNER_FR_KEY`, `GRAVITEE_STREAMS_PARTNER_DE_KEY` | API keys of **Partner France** and **Partner Germany**, on their plans of the Orders Events API. Same rule as the dashboard's |
+| `GRAVITEE_STREAMS_PARTNER_SECRET` | Client secret of the **Partner portal** application in Access Management, with which it gets its tokens |
+| `GRAVITEE_STREAMS_ENCRYPTION_KEY` | Base64 AES-256 key of the encryption policy. A new value, applied with Re-seed, makes the records already encrypted unreadable |
+| `GRAVITEE_STREAMS_BLOB_ACCOUNT_KEY` | Base64 key of the Azurite account `devstoreaccount1`, with which the gateway signs what it offloads. A demo value by default |
+| `GRAVITEE_STREAMS_BLOB_CONNECTION_STRING` | Connection string of the Azurite account where large records are offloaded. It carries the key above by default |
 | `STREAMS_PULL_POLICY` | `build` builds the images here at each start, `always` pulls them |
 | `STREAMS_OPENSSL_VERSION`, `STREAMS_SOCAT_VERSION` | Image tags of the certificate one-shot and of the host names forwarder |
 

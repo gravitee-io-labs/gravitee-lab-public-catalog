@@ -18,7 +18,7 @@ It listens on `127.0.0.1` only.
 
 | What | Value | Setting |
 |---|---|---|
-| Session token, which signs a browser in from the console link | `gravitee-lab-local-inspector`, a public demo value | `MCP_INSPECTOR_SESSION_TOKEN` |
+| Session token, which signs a browser in from the console link | `gravitee-lab-local-inspector`, a public demo value | `MCPJAM_INSPECTOR_SESSION_TOKEN` |
 
 The token is 24 or more letters, digits, `-` or `_`.
 
@@ -27,8 +27,8 @@ The token is 24 or more letters, digits, `-` or `_`.
 | Setting | Default | Meaning |
 |---|---|---|
 | `MCP_INSPECTOR_VERSION` | `3.16.1` | Version of the `@mcpjam/inspector` package |
-| `MCP_INSPECTOR_SESSION_TOKEN` | `gravitee-lab-local-inspector` | Token that signs a browser in from the console link |
-| `MCP_INSPECTOR_ALLOWED_HOSTS` | empty | Other host names it answers to, comma-separated |
+| `MCPJAM_INSPECTOR_SESSION_TOKEN` | `gravitee-lab-local-inspector` | Token that signs a browser in from the console link |
+| `MCPJAM_INSPECTOR_ALLOWED_HOSTS` | empty | Other host names it answers to, comma-separated |
 | `MCP_INSPECTOR_PULL_POLICY` | `build` | `build` builds the image at each start, `never` builds it once, `always` pulls the image that CI builds in `ghcr.io/gravitee-io-labs/gravitee-lab-public-catalog/mcp-inspector-mcp-inspector` |
 
 ## Good to know
