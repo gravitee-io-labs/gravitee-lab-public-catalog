@@ -7,7 +7,7 @@ An APIM gateway that gets its APIs and configuration from your Gravitee Cloud co
 - A hybrid gateway defined in Gravitee Cloud, and its token in `HYBRID_GATEWAY_CLOUD_TOKEN`. The add-on shows **Settings** instead of **Start** until it has the token, and **Needs a hybrid gateway** with a link to the Gravitee Cloud page once you connected a Gravitee Cloud account. The token comes from one of two places:
   - The Lab's Gravitee Cloud page, which writes it in this add-on's settings when it creates or starts the gateway.
   - The Cloud console, Dashboard > Deploy Gateway > Hybrid Gateway, which shows the token once.
-- A license key with the feature `apim-bridge-gateway`, in `HYBRID_GATEWAY_LICENSE`. The wizard of the Cloud console issues a License Key of its own. When `HYBRID_GATEWAY_LICENSE` is empty, the gateway uses the core's `GRAVITEE_LICENSE`.
+- A license key with the feature `apim-bridge-gateway`, in `HYBRID_GATEWAY_LICENSE`. The wizard of the Cloud console issues a License Key of its own. The gateway never reads the core's `GRAVITEE_LICENSE`: give the key here, even when it is the same one. The add-on shows **Settings** instead of **Start** until it has one.
 - Outbound HTTPS from your machine to Gravitee Cloud.
 
 ## Ports
@@ -23,7 +23,7 @@ It listens on `127.0.0.1` only. Its internal API (18082) and its Redis (6379) ar
 | What | Value | Setting |
 |---|---|---|
 | Token of the hybrid gateway | Written by the Lab's Gravitee Cloud page, or pasted from the Cloud console | `HYBRID_GATEWAY_CLOUD_TOKEN` |
-| License key | Empty: the core's license | `HYBRID_GATEWAY_LICENSE` |
+| License key | Yours, with the feature `apim-bridge-gateway` | `HYBRID_GATEWAY_LICENSE` |
 | Password of the gateway's internal API, user `admin` | `adminadmin`, a public demo value, shared with the core | `INTERNAL_API_PASSWORD` |
 | Password of the add-on's Redis | `redispassword`, a public demo value, shared with the core | `REDIS_PASSWORD` |
 
@@ -32,7 +32,7 @@ It listens on `127.0.0.1` only. Its internal API (18082) and its Redis (6379) ar
 | Setting | Default | Meaning |
 |---|---|---|
 | `HYBRID_GATEWAY_CLOUD_TOKEN` | none | The token of the hybrid gateway that runs here. The Gravitee Cloud page writes it when it creates the first gateway or starts another |
-| `HYBRID_GATEWAY_LICENSE` | the core's license | A license key with the feature `apim-bridge-gateway` |
+| `HYBRID_GATEWAY_LICENSE` | none | A license key with the feature `apim-bridge-gateway` |
 | `HYBRID_GATEWAY_VERSION`, `HYBRID_GATEWAY_REGISTRY` | `4.12.23-debian`, `graviteeio` | Version and Docker registry of the gateway image, chosen on the Images page. The Debian image is what the AI policies need, like the core's gateway. Keep its minor version equal to your control plane's |
 | `HYBRID_REDIS_VERSION` | the core's Redis version | Version of the Redis image of the add-on, chosen on the Images page |
 
