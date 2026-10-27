@@ -15,10 +15,10 @@ The default catalog of [Gravitee Lab](https://github.com/gravitee-io-labs/gravit
 
 | Add-on | What it adds |
 |---|---|
-| [AI Agent Inspector](addons/agent-inspector/) | Live sequence diagram of the agent, LLM and MCP traffic |
+| [AI Agent Inspector](addons/ai-agent-inspector/) | Live sequence diagram of the agent, LLM and MCP traffic |
 | [Gamma Tracing](addons/gamma-tracing/) | Step-by-step trace of each call through the gateway |
-| [Hybrid gateway](addons/hybrid/) | A gateway on your machine, managed by Gravitee Cloud |
-| [MCPJam Inspector](addons/mcp-inspector/) | Client for MCP servers, with tool calls and an LLM chat |
+| [Hybrid gateway](addons/hybrid-gateway/) | A gateway on your machine, managed by Gravitee Cloud |
+| [MCPJam Inspector](addons/mcpjam-inspector/) | Client for MCP servers, with tool calls and an LLM chat |
 | [OpenFGA](addons/openfga/) | Fine-grained authorization server, with its Playground |
 | [RedisInsight](addons/redisinsight/) | Browser for the Redis behind rate limits and caches |
 

@@ -4,7 +4,7 @@ x-gravitee:
   category: Observability
   description: Step-by-step trace of each call through the gateway, in Gamma's Tracing pages
   conflicts:
-    agent-inspector: both take the gateway's OpenTelemetry exporter
+    ai-agent-inspector: both take the gateway's OpenTelemetry exporter
 
 services:
 

@@ -21,9 +21,9 @@ services:
       - data-mcp-inspector:/home/node/.mcpjam
     environment:
       # Token that signs a browser in from the console link (24+ letters, digits, - or _)
-      MCPJAM_SESSION_TOKEN: ${MCP_INSPECTOR_SESSION_TOKEN:-gravitee-lab-local-inspector}
+      MCPJAM_SESSION_TOKEN: ${MCPJAM_INSPECTOR_SESSION_TOKEN:-gravitee-lab-local-inspector}
       MCPJAM_INSPECTOR_FRONTEND_URL: http://localhost:6274
-      MCPJAM_ALLOWED_HOSTS: ${MCP_INSPECTOR_ALLOWED_HOSTS:-}   # Other host names it answers to, comma-separated
+      MCPJAM_ALLOWED_HOSTS: ${MCPJAM_INSPECTOR_ALLOWED_HOSTS:-}   # Other host names it answers to, comma-separated
       # Turn off the local shell and browser tools in the container
       MCPJAM_LOCAL_COMPUTER_ENABLED: "false"
       MCPJAM_LOCAL_BROWSER_ENABLED: "false"
@@ -34,7 +34,7 @@ services:
       io.gravitee.name: MCPJam Inspector
       io.gravitee.description: Connects to MCP servers, calls their tools and chats with them through an LLM
       io.gravitee.console.mcp-inspector.name: MCPJam Inspector
-      io.gravitee.console.mcp-inspector.url: http://localhost:6274/#token=${MCP_INSPECTOR_SESSION_TOKEN:-gravitee-lab-local-inspector}
+      io.gravitee.console.mcp-inspector.url: http://localhost:6274/#token=${MCPJAM_INSPECTOR_SESSION_TOKEN:-gravitee-lab-local-inspector}
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:6274/health"]
       interval: 5s

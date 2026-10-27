@@ -46,7 +46,7 @@ Every port binds `127.0.0.1`. The agent's card is behind the gateway's A2A proxy
 | 8086 | Gamma, http://localhost:8086 | `admin` / `admin` |
 | 8081 | Access Management console, http://localhost:8081 | `admin` / `adminadmin` |
 
-The add-ons the playground brings have their own ports and logins: [AI Agent Inspector](../../addons/agent-inspector/README.md) (9002), [OpenFGA](../../addons/openfga/README.md) (3000), [RedisInsight](../../addons/redisinsight/README.md) (5540) and [MCPJam Inspector](../../addons/mcp-inspector/README.md) (6274).
+The add-ons the playground brings have their own ports and logins: [AI Agent Inspector](../../addons/ai-agent-inspector/README.md) (9002), [OpenFGA](../../addons/openfga/README.md) (3000), [RedisInsight](../../addons/redisinsight/README.md) (5540) and [MCPJam Inspector](../../addons/mcpjam-inspector/README.md) (6274).
 
 ## Logins and secrets
 

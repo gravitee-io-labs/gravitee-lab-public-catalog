@@ -5,9 +5,29 @@ x-gravitee-catalog:
   name: Gravitee public
   description: Playgrounds, setups and add-ons of the Lab
   version: 1.1.0
-  lab: 1
+  lab: 3
   license: AGPL-3.0-only
   images: ghcr.io/gravitee-io-labs/gravitee-lab-public-catalog
   shared_settings: [GEMINI_API_KEY, OLLAMA_URL]
   canary:
     - playground:acme-hotels
+  renamed:
+    items:
+      addon:agent-inspector: addon:ai-agent-inspector
+      addon:hybrid: addon:hybrid-gateway
+      addon:mcp-inspector: addon:mcpjam-inspector
+      playground:streams: playground:event-streams-management-with-kafka
+    settings:
+      HYBRID_CLOUD_TOKEN: HYBRID_GATEWAY_CLOUD_TOKEN
+      HYBRID_LICENSE: HYBRID_GATEWAY_LICENSE
+      MCP_INSPECTOR_ALLOWED_HOSTS: MCPJAM_INSPECTOR_ALLOWED_HOSTS
+      MCP_INSPECTOR_SESSION_TOKEN: MCPJAM_INSPECTOR_SESSION_TOKEN
+      STREAMS_AM_PASSWORD: GRAVITEE_STREAMS_AM_PASSWORD
+      STREAMS_APIM_PASSWORD: GRAVITEE_STREAMS_APIM_PASSWORD
+      STREAMS_BLOB_ACCOUNT_KEY: GRAVITEE_STREAMS_BLOB_ACCOUNT_KEY
+      STREAMS_BLOB_CONNECTION_STRING: GRAVITEE_STREAMS_BLOB_CONNECTION_STRING
+      STREAMS_ENCRYPTION_KEY: GRAVITEE_STREAMS_ENCRYPTION_KEY
+      STREAMS_ORDERS_KEY: GRAVITEE_STREAMS_ORDERS_KEY
+      STREAMS_PARTNER_DE_KEY: GRAVITEE_STREAMS_PARTNER_DE_KEY
+      STREAMS_PARTNER_FR_KEY: GRAVITEE_STREAMS_PARTNER_FR_KEY
+      STREAMS_PARTNER_SECRET: GRAVITEE_STREAMS_PARTNER_SECRET
