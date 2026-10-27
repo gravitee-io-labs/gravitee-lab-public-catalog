@@ -7,7 +7,7 @@ x-streams-secrets:
   partner-secret: &partner-secret ${GRAVITEE_STREAMS_PARTNER_SECRET:-streams-partner-secret}   # Client secret of the Partner portal application in Access Management, with which it gets its tokens
   am-password: &am-password ${GRAVITEE_STREAMS_AM_PASSWORD:-adminadmin}   # Password of user admin in Access Management, which the seed signs in with
   encryption-key: &encryption-key ${GRAVITEE_STREAMS_ENCRYPTION_KEY:-Z3Jhdml0ZWUtbGFiLWRlbW8tYWVzMjU2LWtleS0wMDE=}   # Base64 AES-256 key with which the gateway encrypts the card and the email of an order in Kafka; a new value makes messages already in the topic unreadable
-  blob-connection: &blob-connection ${GRAVITEE_STREAMS_BLOB_CONNECTION_STRING:-DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=${GRAVITEE_STREAMS_BLOB_ACCOUNT_KEY:-Z3Jhdml0ZWUtbGFiLWRlbW8tYXp1cmUtYmxvYi1hY2NvdW50LWtleS0wMDAx};BlobEndpoint=http://azurite:10000/devstoreaccount1;}   # Connection string of the Azurite account where the gateway offloads large messages, with the key of STREAMS_BLOB_ACCOUNT_KEY
+  blob-connection: &blob-connection ${GRAVITEE_STREAMS_BLOB_CONNECTION_STRING:-DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=${GRAVITEE_STREAMS_BLOB_ACCOUNT_KEY:-Z3Jhdml0ZWUtbGFiLWRlbW8tYXp1cmUtYmxvYi1hY2NvdW50LWtleS0wMDAx};BlobEndpoint=http://azurite:10000/devstoreaccount1;}   # Connection string of the Azurite account where the gateway offloads large messages, with the key of GRAVITEE_STREAMS_BLOB_ACCOUNT_KEY
 
 x-gravitee:
   kind: playground
