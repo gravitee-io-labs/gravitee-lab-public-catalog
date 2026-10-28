@@ -42,8 +42,8 @@ class Workspace:
         self._keys = keys
 
     async def _find(self, name: str, deployed: bool) -> dict:
-        found = await self._get(f"{self._aim}/ai-workspaces", {"q": name, "page": 0, "perPage": PAGE})
-        match = next((w for w in found.get("content", []) if w.get("name") == name), None)
+        found = await self._get(f"{self._aim}/ai-workspaces", {"q": name, "page": 1, "perPage": PAGE})
+        match = next((w for w in found.get("data", []) if w.get("name") == name), None)
         if match is None:
             raise PlatformError(f"the AI workspace {name} does not exist yet")
         if deployed and match.get("deploymentState") != "DEPLOYED":

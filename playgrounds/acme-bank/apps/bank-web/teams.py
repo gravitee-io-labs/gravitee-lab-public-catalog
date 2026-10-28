@@ -70,8 +70,8 @@ class TeamKeys:
 
     async def _find_workspace(self) -> dict:
         base = f"{self.management.modules}/aim/ai-workspaces"
-        found = await self.management.get(base, q=WORKSPACE, page=0, perPage=50)
-        match = next((w for w in found.get("content", []) if w.get("name") == WORKSPACE), None)
+        found = await self.management.get(base, q=WORKSPACE, page=1, perPage=50)
+        match = next((w for w in found.get("data", []) if w.get("name") == WORKSPACE), None)
         if match is None:
             raise UpstreamError(f"The AI workspace {WORKSPACE} does not exist. Re-seed the playground.", 503)
         return await self.management.get(f"{base}/{match['id']}")

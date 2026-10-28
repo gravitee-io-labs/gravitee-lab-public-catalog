@@ -666,8 +666,10 @@ class FakeApim:
         return JSONResponse({"data": data})
 
     async def workspaces(self, request: Request) -> Response:
+        if int(request.query_params.get("page", "1")) < 1:
+            return JSONResponse({"message": "Pagination page param must be >= 1"}, status_code=400)
         found = [{"id": "ws-1", "name": "ACME Bank Teams"}] if self.workspace_exists else []
-        return self._refused(request) or JSONResponse({"content": found, "totalElements": len(found)})
+        return self._refused(request) or JSONResponse({"data": found, "pagination": {"page": 1, "perPage": 50, "totalCount": len(found)}})
 
     async def workspace_one(self, request: Request) -> Response:
         return self._refused(request) or JSONResponse(

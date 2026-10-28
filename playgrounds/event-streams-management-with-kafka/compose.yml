@@ -22,20 +22,20 @@ x-gravitee:
       APIM_VERSION: "4.13.0-alpha.6"   # Gamma's Event Stream Management with the Message APIs, the dashboards, the logs and the Explorer; 4.12 has none of them
     plugins:
       apim: [gravitee-resource-storage-azure-blob]
-    license:
-      apim-en-message-reactor: Lessons 1 to 6
-      apim-en-endpoint-kafka: Lessons 1 to 6
-      apim-native-kafka-reactor: Lessons 7 to 12
-      apim-native-kafka-policy-acl: Lessons 7 to 12
-      apim-native-kafka-policy-topic-mapping: Lessons 7 to 12
-      apim-native-kafka-policy-rules: Lesson 10
-      apim-native-kafka-policy-quota: Lesson 10
-      apim-native-kafka-policy-encryption: Lesson 12
-      apim-native-kafka-policy-offloading: Lesson 12
-      apim-native-kafka-explorer: Lessons 2, 7, 11 and 12
-      gamma-esm-module: Lessons 1 to 12
+    license:   # its seed deploys APIs that use them: it does not start without a license
+      - apim-en-message-reactor
+      - apim-en-endpoint-kafka
+      - apim-native-kafka-reactor
+      - apim-native-kafka-policy-acl
+      - apim-native-kafka-policy-topic-mapping
+      - apim-native-kafka-policy-rules
+      - apim-native-kafka-policy-quota
+      - apim-native-kafka-policy-encryption
+      - apim-native-kafka-policy-offloading
+      - apim-native-kafka-explorer
+      - gamma-esm-module
   tested:
-    - APIM_VERSION: "4.13.0-alpha.6"
+    - APIM_VERSION: "4.13.1"
       APIM_REGISTRY: graviteeio
   consoles:
     - streams-app
