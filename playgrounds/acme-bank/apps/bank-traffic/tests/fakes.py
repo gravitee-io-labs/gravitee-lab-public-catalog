@@ -344,8 +344,10 @@ class Platform:
         base = "/organizations/DEFAULT/environments/DEFAULT/modules/aim/ai-workspaces"
 
         async def workspaces(request: Request) -> Response:
-            found = [{"id": "ws-1", "name": "ACME Bank Teams", "deploymentState": self.workspace_state}]
-            return JSONResponse({"content": found if self.workspace_exists else [], "totalElements": 1})
+            if int(request.query_params.get("page", "1")) < 1:
+                return JSONResponse({"message": "Pagination page param must be >= 1"}, status_code=400)
+            found = [{"id": "ws-1", "name": "ACME Bank Teams", "deploymentState": self.workspace_state}] if self.workspace_exists else []
+            return JSONResponse({"data": found, "pagination": {"page": 1, "perPage": 100, "totalCount": len(found)}})
 
         async def workspace(request: Request) -> Response:
             return JSONResponse({"id": "ws-1", "name": "ACME Bank Teams", "contextPath": "/acme-bank-teams"})

@@ -27,7 +27,7 @@ x-gravitee:
   first_start: 10 min
   requires:
     images:
-      APIM_VERSION: "4.13.0-alpha.5"
+      APIM_VERSION: "4.13.1"   # Gamma's lists start at page 1 and answer `data`
       AM_VERSION: "4.13.0-alpha.9"   # a pre-release (alpha) build of 4.13: a bare 4.13 is the release, which comes after them
     license:
       - gamma-aim-module
@@ -51,10 +51,10 @@ x-gravitee:
       - name: Hugging Face (the gateway's AI models)
         check: https://huggingface.co
         help: The gateway downloads its AI models (129 MB) from huggingface.co when it first deploys the LLM proxy. Without access the seed ends with a timeout
-  tested:                                   # the versions it was built and checked on: the latest published, until 4.13 is stable
-    - APIM_VERSION: "4.13.0-alpha.5"        # its core carries the 4.13.0-alpha.9 libraries
+  tested:
+    - APIM_VERSION: "4.13.1"
       APIM_REGISTRY: graviteeio
-      AM_VERSION: "4.13.0-alpha.9"
+      AM_VERSION: "4.13.1"
       AM_REGISTRY: graviteeio
   consoles: [bank-web, gamma-ui]
   accounts:
