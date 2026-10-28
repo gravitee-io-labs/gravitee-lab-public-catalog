@@ -33,6 +33,11 @@ x-gravitee:
       - name: Hugging Face (the gateway's AI models)
         check: https://huggingface.co
         help: The gateway downloads its AI models (129 MB) from huggingface.co when it first deploys the LLM proxy. Without access the seed ends with a timeout
+  tested:
+    - APIM_VERSION: "4.13.1"
+      APIM_REGISTRY: graviteeio
+      AM_VERSION: "4.13.1"
+      AM_REGISTRY: graviteeio
   consoles: [apim-management-ui, gamma-ui]
   accounts:
     - for: "ACME Hotels website: John Doe (guest)"

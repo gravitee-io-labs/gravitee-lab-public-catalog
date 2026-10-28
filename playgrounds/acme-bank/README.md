@@ -9,7 +9,7 @@ All of ACME Bank's data is invented: its people, accounts, branches and addresse
 | Need | Details |
 |---|---|
 | An Enterprise license | It must include Gamma's Agent Management and Authorization modules, and the MCP proxy. Add it from the **CE** chip of the Lab UI's Containers page. To get one, see [What needs a license](https://github.com/gravitee-io-labs/gravitee-lab/blob/main/docs/installation.md#what-needs-a-license). |
-| Pre-release (alpha) builds of 4.13 of API Management and Access Management | Gravitee 4.13 is in alpha: choose the 4.13 tags on the Images page. API Management needs 4.13.0-alpha.3 or later, and Access Management 4.13 or later, because the core's default versions are older. The playground's page says so under **Before you start**, and Start names every image that is too old in one sentence. |
+| API Management 4.13.1 or later | The default of an up-to-date Gravitee Lab. With an older version set on the Images page, the playground's page says so under **Before you start**, and Start names every image that is too old in one sentence. |
 | Ollama on your machine, with `qwen3:1.7b` and `qwen3:0.6b` | See [Start it](#start-it). ACME Bank on Windows is untested; the Ollama setup for it is not verified. |
 | Internet access | The gateway downloads its AI models (129 MB) from huggingface.co the first time it deploys the LLM proxy. Without access the seed, a one-time job that creates the playground's sample APIs and users, ends with a timeout. |
 | 10 GB of memory for Docker | |
