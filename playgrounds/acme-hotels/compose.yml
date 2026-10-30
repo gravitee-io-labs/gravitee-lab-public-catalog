@@ -36,11 +36,11 @@ x-gravitee:
   tested:
     - APIM_VERSION: "4.12.25"
       APIM_REGISTRY: graviteeio
-      AM_VERSION: "4.12.10"
+      AM_VERSION: "4.12.11"
       AM_REGISTRY: graviteeio
     - APIM_VERSION: "4.13.1"
       APIM_REGISTRY: graviteeio
-      AM_VERSION: "4.13.1"
+      AM_VERSION: "4.13.2"
       AM_REGISTRY: graviteeio
   consoles: [apim-management-ui, gamma-ui]
   accounts:
