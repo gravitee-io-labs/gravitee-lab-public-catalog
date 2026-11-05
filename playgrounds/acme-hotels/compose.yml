@@ -40,7 +40,7 @@ x-gravitee:
       AM_REGISTRY: graviteeio
     - APIM_VERSION: "4.13.2"
       APIM_REGISTRY: graviteeio
-      AM_VERSION: "4.13.2"
+      AM_VERSION: "4.13.3"
       AM_REGISTRY: graviteeio
   consoles: [apim-management-ui, gamma-ui]
   accounts:
