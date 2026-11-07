@@ -35,7 +35,7 @@ x-gravitee:
       - apim-native-kafka-explorer
       - gamma-esm-module
   tested:
-    - APIM_VERSION: "4.13.2"
+    - APIM_VERSION: "4.13.3"
       APIM_REGISTRY: graviteeio
   consoles:
     - streams-app
