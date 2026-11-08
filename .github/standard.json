@@ -1,7 +1,7 @@
 {
   "form": "inline",
   "lab": {
-    "ref": "cd8248a64c946a8346d49cd78411822e7948cd00",
+    "ref": "42ce3415892c5552e134f17492e82c76813553f2",
     "repository": "gravitee-io-labs/gravitee-lab"
   },
   "platforms": ["linux/amd64"],
