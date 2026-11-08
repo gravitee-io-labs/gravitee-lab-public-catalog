@@ -28,7 +28,7 @@ x-gravitee:
   requires:
     images:
       APIM_VERSION: "4.13.0"   # the first release with the Gamma modules
-      AM_VERSION: "4.13.0-alpha.9"   # a pre-release (alpha) build of 4.13: a bare 4.13 is the release, which comes after them
+      AM_VERSION: "4.13.0"   # the first release of 4.13, as for API Management
     license:
       - gamma-aim-module
       - apim-mcp-proxy-reactor              # the MCP proxy, and its mcp-acl policy

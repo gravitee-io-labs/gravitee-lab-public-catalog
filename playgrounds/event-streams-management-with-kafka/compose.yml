@@ -19,7 +19,7 @@ x-gravitee:
   first_start: 6 min
   requires:
     images:
-      APIM_VERSION: "4.13.0-alpha.6"   # Gamma's Event Stream Management with the Message APIs, the dashboards, the logs and the Explorer; 4.12 has none of them
+      APIM_VERSION: "4.13.0"   # Gamma's Event Stream Management with the Message APIs, the dashboards, the logs and the Explorer; 4.12 has none of them
     plugins:
       apim: [gravitee-resource-storage-azure-blob]
     license:   # its seed deploys APIs that use them: it does not start without a license
@@ -35,6 +35,8 @@ x-gravitee:
       - apim-native-kafka-explorer
       - gamma-esm-module
   tested:
+    - APIM_VERSION: "4.13.0"   # the first release it needs
+      APIM_REGISTRY: graviteeio
     - APIM_VERSION: "4.13.3"
       APIM_REGISTRY: graviteeio
   consoles:
