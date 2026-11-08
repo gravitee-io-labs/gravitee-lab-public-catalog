@@ -1,9 +1,9 @@
 {
   "form": "inline",
   "lab": {
-    "ref": "c2641d55f68c8a0dbda7a7f8d37aed6deb24734d",
+    "ref": "de0a83dd5d3bdbaea3b925d6904fcdad3c04cf19",
     "repository": "gravitee-io-labs/gravitee-lab"
   },
   "platforms": ["linux/amd64"],
-  "standard": 9
+  "standard": 10
 }
