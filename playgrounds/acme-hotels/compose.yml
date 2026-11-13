@@ -38,7 +38,7 @@ x-gravitee:
       APIM_REGISTRY: graviteeio
       AM_VERSION: "4.12.11"
       AM_REGISTRY: graviteeio
-    - APIM_VERSION: "4.13.3"
+    - APIM_VERSION: "4.13.4"
       APIM_REGISTRY: graviteeio
       AM_VERSION: "4.13.3"
       AM_REGISTRY: graviteeio

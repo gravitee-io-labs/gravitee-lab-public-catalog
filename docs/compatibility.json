@@ -1,0 +1,38 @@
+{
+  "playgrounds": {
+    "acme-bank": {
+      "name": "ACME Bank",
+      "results": {
+        "AM_VERSION 4.13.3, APIM_VERSION 4.13.4": {
+          "date": "2026-11-13",
+          "files": "40d821b083243ed4",
+          "lab": "07565c5b0e22906137d7a88e376ecc434d8705d9",
+          "passed": true
+        }
+      }
+    },
+    "acme-hotels": {
+      "name": "ACME Hotels",
+      "results": {
+        "AM_VERSION 4.13.3, APIM_VERSION 4.13.4": {
+          "date": "2026-11-13",
+          "files": "4fcc801826da4a19",
+          "lab": "07565c5b0e22906137d7a88e376ecc434d8705d9",
+          "passed": true
+        }
+      }
+    },
+    "event-streams-management-with-kafka": {
+      "name": "Event Streams Management with Kafka",
+      "results": {
+        "APIM_VERSION 4.13.4": {
+          "date": "2026-11-13",
+          "files": "04cf10fdada51387",
+          "lab": "07565c5b0e22906137d7a88e376ecc434d8705d9",
+          "passed": true
+        }
+      }
+    }
+  },
+  "schema": 1
+}
