@@ -14,6 +14,12 @@
     "acme-hotels": {
       "name": "ACME Hotels",
       "results": {
+        "AM_VERSION 4.12.11, APIM_VERSION 4.12.27": {
+          "date": "2026-11-13",
+          "files": "4fcc801826da4a19",
+          "lab": "07565c5b0e22906137d7a88e376ecc434d8705d9",
+          "passed": true
+        },
         "AM_VERSION 4.13.3, APIM_VERSION 4.13.4": {
           "date": "2026-11-13",
           "files": "4fcc801826da4a19",

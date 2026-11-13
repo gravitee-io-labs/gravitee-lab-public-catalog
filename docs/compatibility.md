@@ -14,6 +14,7 @@ no lab, with the license, as `make e2e` does. A set that fails opens an issue la
 | Versions | Result | Date |
 |---|---|---|
 | AM_VERSION 4.13.3, APIM_VERSION 4.13.4 | Works | 2026-11-13 |
+| AM_VERSION 4.12.11, APIM_VERSION 4.12.27 | Works | 2026-11-13 |
 
 ## Event Streams Management with Kafka
 
