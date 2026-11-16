@@ -8,6 +8,13 @@
           "files": "40d821b083243ed4",
           "lab": "07565c5b0e22906137d7a88e376ecc434d8705d9",
           "passed": true
+        },
+        "AM_VERSION 4.13.4, APIM_VERSION 4.13.4": {
+          "date": "2026-11-16",
+          "files": "40d821b083243ed4",
+          "lab": "07565c5b0e22906137d7a88e376ecc434d8705d9",
+          "passed": false,
+          "run": "https://github.com/gravitee-io-labs/gravitee-lab-public-catalog/actions/runs/43848502468"
         }
       }
     },
@@ -32,6 +39,13 @@
           "files": "4fcc801826da4a19",
           "lab": "07565c5b0e22906137d7a88e376ecc434d8705d9",
           "passed": true
+        },
+        "AM_VERSION 4.13.4, APIM_VERSION 4.13.4": {
+          "date": "2026-11-16",
+          "files": "4fcc801826da4a19",
+          "lab": "07565c5b0e22906137d7a88e376ecc434d8705d9",
+          "passed": false,
+          "run": "https://github.com/gravitee-io-labs/gravitee-lab-public-catalog/actions/runs/43848502468"
         }
       }
     },
