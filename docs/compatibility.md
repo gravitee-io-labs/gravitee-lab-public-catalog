@@ -7,6 +7,7 @@ no lab, with the license, as `make e2e` does. A set that fails opens an issue la
 
 | Versions | Result | Date |
 |---|---|---|
+| AM_VERSION 4.13.6, APIM_VERSION 4.13.5 | Works | 2026-11-20 |
 | AM_VERSION 4.13.5, APIM_VERSION 4.13.5 | Works | 2026-11-19 |
 | AM_VERSION 4.13.5, APIM_VERSION 4.13.4 | Fails ([run](https://github.com/gravitee-io-labs/gravitee-lab-public-catalog/actions/runs/43953545241)) | 2026-11-16 |
 | AM_VERSION 4.13.4, APIM_VERSION 4.13.4 | Fails ([run](https://github.com/gravitee-io-labs/gravitee-lab-public-catalog/actions/runs/43848502468)) | 2026-11-16 |
@@ -16,6 +17,7 @@ no lab, with the license, as `make e2e` does. A set that fails opens an issue la
 
 | Versions | Result | Date |
 |---|---|---|
+| AM_VERSION 4.13.6, APIM_VERSION 4.13.5 | Works | 2026-11-20 |
 | AM_VERSION 4.13.5, APIM_VERSION 4.13.5 | Works | 2026-11-19 |
 | AM_VERSION 4.13.5, APIM_VERSION 4.13.4 | Fails ([run](https://github.com/gravitee-io-labs/gravitee-lab-public-catalog/actions/runs/43953545241)) | 2026-11-16 |
 | AM_VERSION 4.13.4, APIM_VERSION 4.13.4 | Fails ([run](https://github.com/gravitee-io-labs/gravitee-lab-public-catalog/actions/runs/43848502468)) | 2026-11-16 |
