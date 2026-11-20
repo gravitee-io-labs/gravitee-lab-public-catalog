@@ -1,5 +1,5 @@
 confluent-kafka==2.16.1
-azure-storage-blob==12.31.0
+azure-storage-blob==12.31.1
 fastavro==1.13.1
 # certifi: the CA bundle the others use, at the first release past GHSA-6q48-6c7w-9gw2 (emSign roots whose intermediate keys were compromised)
 certifi==2026.10.23
