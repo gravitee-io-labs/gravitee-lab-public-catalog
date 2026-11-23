@@ -54,7 +54,7 @@ x-gravitee:
   tested:
     - APIM_VERSION: "4.13.6"
       APIM_REGISTRY: graviteeio
-      AM_VERSION: "4.13.6"
+      AM_VERSION: "4.13.7"
       AM_REGISTRY: graviteeio
   consoles: [bank-web, gamma-ui]
   accounts:
