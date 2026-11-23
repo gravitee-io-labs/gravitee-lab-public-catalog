@@ -35,6 +35,7 @@ no lab, with the license, as `make e2e` does. A set that fails opens an issue la
 
 | Versions | Result | Date |
 |---|---|---|
+| APIM_VERSION 4.14.0-alpha.1 | Works | 2026-11-23 |
 | APIM_VERSION 4.13.6 | Works | 2026-11-20 |
 | APIM_VERSION 4.13.5 | Works | 2026-11-19 |
 | APIM_VERSION 4.13.4 | Works | 2026-11-13 |
