@@ -7,6 +7,7 @@ no lab, with the license, as `make e2e` does. A set that fails opens an issue la
 
 | Versions | Result | Date |
 |---|---|---|
+| AM_VERSION 4.13.7, APIM_VERSION 4.13.7 | Works | 2026-11-24 |
 | AM_VERSION 4.13.7, APIM_VERSION 4.13.6 | Works | 2026-11-23 |
 | AM_VERSION 4.13.6, APIM_VERSION 4.13.6 | Works | 2026-11-20 |
 | AM_VERSION 4.13.6, APIM_VERSION 4.13.5 | Works | 2026-11-20 |
@@ -19,6 +20,7 @@ no lab, with the license, as `make e2e` does. A set that fails opens an issue la
 
 | Versions | Result | Date |
 |---|---|---|
+| AM_VERSION 4.13.7, APIM_VERSION 4.13.7 | Works | 2026-11-24 |
 | AM_VERSION 4.13.7, APIM_VERSION 4.13.6 | Works | 2026-11-23 |
 | AM_VERSION 4.13.6, APIM_VERSION 4.13.6 | Works | 2026-11-20 |
 | AM_VERSION 4.13.6, APIM_VERSION 4.13.5 | Works | 2026-11-20 |
@@ -39,6 +41,7 @@ no lab, with the license, as `make e2e` does. A set that fails opens an issue la
 | Versions | Result | Date |
 |---|---|---|
 | APIM_VERSION 4.14.0-alpha.1 | Works | 2026-11-23 |
+| APIM_VERSION 4.13.7 | Works | 2026-11-24 |
 | APIM_VERSION 4.13.6 | Works | 2026-11-20 |
 | APIM_VERSION 4.13.5 | Works | 2026-11-19 |
 | APIM_VERSION 4.13.4 | Works | 2026-11-13 |
