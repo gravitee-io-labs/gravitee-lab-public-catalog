@@ -32,6 +32,7 @@ no lab, with the license, as `make e2e` does. A set that fails opens an issue la
 | AM_VERSION 4.13.5, APIM_VERSION 4.13.4 | Fails ([run](https://github.com/gravitee-io-labs/gravitee-lab-public-catalog/actions/runs/43953545241)) | 2026-11-16 |
 | AM_VERSION 4.13.4, APIM_VERSION 4.13.4 | Fails ([run](https://github.com/gravitee-io-labs/gravitee-lab-public-catalog/actions/runs/43848502468)) | 2026-11-16 |
 | AM_VERSION 4.13.3, APIM_VERSION 4.13.4 | Works | 2026-11-13 |
+| AM_VERSION 4.12.16, APIM_VERSION 4.12.30 | Works | 2026-11-26 |
 | AM_VERSION 4.12.16, APIM_VERSION 4.12.29 | Fails ([run](https://github.com/gravitee-io-labs/gravitee-lab-public-catalog/actions/runs/45674051430)) | 2026-11-25 |
 | AM_VERSION 4.12.15, APIM_VERSION 4.12.29 | Fails ([run](https://github.com/gravitee-io-labs/gravitee-lab-public-catalog/actions/runs/45247461207)) | 2026-11-23 |
 | AM_VERSION 4.12.14, APIM_VERSION 4.12.29 | Works | 2026-11-20 |
