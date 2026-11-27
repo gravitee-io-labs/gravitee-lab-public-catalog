@@ -34,11 +34,11 @@ x-gravitee:
         check: https://huggingface.co
         help: The gateway downloads its AI models (129 MB) from huggingface.co when it first deploys the LLM proxy. Without access the seed ends with a timeout
   tested:
-    - APIM_VERSION: "4.12.30"
+    - APIM_VERSION: "4.12.31"
       APIM_REGISTRY: graviteeio
       AM_VERSION: "4.12.16"
       AM_REGISTRY: graviteeio
-    - APIM_VERSION: "4.13.8"
+    - APIM_VERSION: "4.13.9"
       APIM_REGISTRY: graviteeio
       AM_VERSION: "4.13.8"
       AM_REGISTRY: graviteeio

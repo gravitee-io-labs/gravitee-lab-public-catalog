@@ -65,6 +65,12 @@
           "lab": "07565c5b0e22906137d7a88e376ecc434d8705d9",
           "passed": true
         },
+        "AM_VERSION 4.13.8, APIM_VERSION 4.13.9": {
+          "date": "2026-11-27",
+          "files": "40d821b083243ed4",
+          "lab": "07565c5b0e22906137d7a88e376ecc434d8705d9",
+          "passed": true
+        },
         "AM_VERSION 4.14.0-alpha.2, APIM_VERSION 4.14.0-alpha.1": {
           "date": "2026-11-26",
           "files": "40d821b083243ed4",
@@ -136,6 +142,12 @@
           "lab": "07565c5b0e22906137d7a88e376ecc434d8705d9",
           "passed": true
         },
+        "AM_VERSION 4.12.16, APIM_VERSION 4.12.31": {
+          "date": "2026-11-27",
+          "files": "4fcc801826da4a19",
+          "lab": "07565c5b0e22906137d7a88e376ecc434d8705d9",
+          "passed": true
+        },
         "AM_VERSION 4.13.3, APIM_VERSION 4.13.4": {
           "date": "2026-11-13",
           "files": "4fcc801826da4a19",
@@ -198,6 +210,12 @@
           "lab": "07565c5b0e22906137d7a88e376ecc434d8705d9",
           "passed": true
         },
+        "AM_VERSION 4.13.8, APIM_VERSION 4.13.9": {
+          "date": "2026-11-27",
+          "files": "4fcc801826da4a19",
+          "lab": "07565c5b0e22906137d7a88e376ecc434d8705d9",
+          "passed": true
+        },
         "AM_VERSION 4.14.0-alpha.2, APIM_VERSION 4.14.0-alpha.1": {
           "date": "2026-11-26",
           "files": "4fcc801826da4a19",
@@ -236,6 +254,12 @@
         },
         "APIM_VERSION 4.13.8": {
           "date": "2026-11-26",
+          "files": "04cf10fdada51387",
+          "lab": "07565c5b0e22906137d7a88e376ecc434d8705d9",
+          "passed": true
+        },
+        "APIM_VERSION 4.13.9": {
+          "date": "2026-11-27",
           "files": "04cf10fdada51387",
           "lab": "07565c5b0e22906137d7a88e376ecc434d8705d9",
           "passed": true

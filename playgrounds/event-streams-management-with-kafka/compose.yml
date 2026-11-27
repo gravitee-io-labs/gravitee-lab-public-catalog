@@ -37,7 +37,7 @@ x-gravitee:
   tested:
     - APIM_VERSION: "4.14.0-alpha.1"
       APIM_REGISTRY: graviteeio
-    - APIM_VERSION: "4.13.8"
+    - APIM_VERSION: "4.13.9"
       APIM_REGISTRY: graviteeio
   consoles:
     - streams-app
